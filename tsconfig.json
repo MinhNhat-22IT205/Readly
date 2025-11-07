@@ -1,6 +1,35 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
-  }
+    "strict": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": [
+        "src/app/*"
+      ],
+      "@features/*": [
+        "src/features/*"
+      ],
+      "@shared-constants/*": [
+        "src/shared/constants/*"
+      ],
+      "@shared-libs/*": [
+        "src/shared/libs/*"
+      ],
+      "@shared-types/*": [
+        "src/shared/types/*"
+      ],
+      "@shared-utils/*": [
+        "src/shared/utils/*"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "app",
+    "index.ts",
+    "index.tsx",
+    "nativewind-env.d.ts"
+  ]
 }
