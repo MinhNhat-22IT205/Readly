@@ -22,6 +22,9 @@
       ],
       "@shared-utils/*": [
         "src/shared/utils/*"
+      ],
+      "@shared-components/*": [
+        "src/shared/components/*"
       ]
     }
   },

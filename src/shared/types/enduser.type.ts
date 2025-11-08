@@ -4,7 +4,7 @@ type EndUser = {
   email: string;
   password: string;
   avatar: string;
-  description: string;
+  bio: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -12,7 +12,7 @@ type EndUser = {
 type EndUserMinimal = Pick<EndUser, "_id" | "username" | "avatar">;
 type EndUserSearchMinimal = Pick<
   EndUser,
-  "_id" | "username" | "avatar" | "description"
+  "_id" | "username" | "avatar" | "bio"
 >;
 type EndUserProfile = {
   endUser: EndUser;

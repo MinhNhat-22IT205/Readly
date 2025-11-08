@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, StatusBar } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { QuoteList } from "../../features/summary/components/QuoteList";
 import { SummaryList } from "../../features/summary/components/SummaryList";
 import { SectionHeader } from "../../features/summary/components/SectionHeader";
-import { Quote } from "../../features/summary/components/QuoteCardItem";
+import { Comment } from "@shared-types/comment.type";
+import { Summary } from "@shared-types/summary.type";
 import { Book } from "../../features/summary/components/SummaryCardItem";
 import { HomeStackParamList } from "../navigation/HomeStack";
+import { PublicCommentList } from "@features/reader-comment/components/PublicCommentList";
 
 type TabType = "home" | "explore" | "library";
 type HomeScreenNavigationProp = NativeStackNavigationProp<
@@ -15,24 +16,103 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<
   "Home"
 >;
 
-const quotes: Quote[] = [
+const comments: Comment[] = [
   {
-    id: 1,
-    text: "And when it was time to go, the time was no more in control but he kep...",
-    image:
-      "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&h=400&fit=crop",
+    _id: "1",
+    summary: {
+      _id: "summary1",
+      title: "The good guy",
+      book_athor: "Mark mcallister",
+      book_cover_path:
+        "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=450&fit=crop",
+      published_date: new Date(),
+      category_id: "cat1",
+      user: {
+        _id: "author1",
+        username: "Mark mcallister",
+        avatar:
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
+      },
+      status: "approved",
+      read_count: 8000000,
+      content: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    endUser: {
+      _id: "user1",
+      username: "John Doe",
+      avatar:
+        "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&h=400&fit=crop",
+    },
+    content:
+      "And when it was time to go, the time was no more in control but he kep...",
+    access: "public",
+    createdAt: new Date(),
   },
   {
-    id: 2,
-    text: "Life is like a time machine, it takes you to future",
-    image:
-      "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop",
+    _id: "2",
+    summary: {
+      _id: "summary2",
+      title: "Futurama",
+      book_athor: "Michael Douglas jr.",
+      book_cover_path:
+        "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=300&h=450&fit=crop",
+      published_date: new Date(),
+      category_id: "cat2",
+      user: {
+        _id: "author2",
+        username: "Michael Douglas jr.",
+        avatar:
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
+      },
+      status: "approved",
+      read_count: 9000000,
+      content: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    endUser: {
+      _id: "user2",
+      username: "Jane Smith",
+      avatar:
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop",
+    },
+    content: "Life is like a time machine, it takes you to future",
+    access: "public",
+    createdAt: new Date(),
   },
   {
-    id: 3,
-    text: "Creativity is the life of the creative minds",
-    image:
-      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop",
+    _id: "3",
+    summary: {
+      _id: "summary3",
+      title: "Explore your create...",
+      book_athor: "Royryan Mercado",
+      book_cover_path:
+        "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=450&fit=crop",
+      published_date: new Date(),
+      category_id: "cat3",
+      user: {
+        _id: "author3",
+        username: "Royryan Mercado",
+        avatar:
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
+      },
+      status: "approved",
+      read_count: 15000000,
+      content: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    endUser: {
+      _id: "user3",
+      username: "Bob Johnson",
+      avatar:
+        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop",
+    },
+    content: "Creativity is the life of the creative minds",
+    access: "public",
+    createdAt: new Date(),
   },
 ];
 
@@ -122,8 +202,8 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-24"
       >
-        {/* Quotes */}
-        <QuoteList quotes={quotes} />
+        {/* Comments */}
+        <PublicCommentList comments={comments} />
 
         {/* For You */}
         <SectionHeader
