@@ -31,5 +31,5 @@
     "index.ts",
     "index.tsx",
     "nativewind-env.d.ts"
-  ]
+, "App.tsx"  ]
 }

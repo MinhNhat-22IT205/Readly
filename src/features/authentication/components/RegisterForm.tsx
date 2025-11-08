@@ -1,4 +1,3 @@
-// RegisterScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Pressable } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
@@ -10,7 +9,8 @@ import { RootStackParamList } from '@app/navigation/AppNavigator';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
-export const RegisterScreen: React.FC = () => {
+export default function RegisterForm() {
+
   const navigation = useNavigation<RegisterScreenNavigationProp>();
 
   const { control, handleSubmit, formState: { errors } } = useForm<ztRegisterInputs>({
@@ -28,9 +28,7 @@ export const RegisterScreen: React.FC = () => {
   };
 
   return (
-    <View className="flex-1 bg-neutral-900 justify-center px-6">
-      <Text className="text-white text-3xl font-bold mb-10">Sign up</Text>
-      <View className="bg-neutral-800 rounded-xl p-6">
+    <View className="bg-neutral-800 rounded-xl p-6">
         <Text className="text-neutral-400 mb-4">
           Looks like you don’t have an account. Let’s create a new account for you.
         </Text>
@@ -122,6 +120,5 @@ export const RegisterScreen: React.FC = () => {
           </Pressable>
         </View>
       </View>
-    </View>
-  );
-};
+  )
+}

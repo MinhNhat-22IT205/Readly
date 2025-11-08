@@ -1,6 +1,4 @@
-// LoginScreen.tsx
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text ,  TextInput, TouchableOpacity, Pressable } from 'react-native'
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { zLoginInputs, ztLoginInputs } from '../libs/login.zod';
@@ -10,22 +8,19 @@ import { useNavigation } from '@react-navigation/native';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
-export const LoginScreen: React.FC = () => {
-  const { control, handleSubmit, formState: { errors } } = useForm<ztLoginInputs>({
-    resolver: zodResolver(zLoginInputs),
-    defaultValues: { email: '', password: '' },
-  });
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+export default function LoginForm() {
+    const { control, handleSubmit, formState: { errors } } = useForm<ztLoginInputs>({
+        resolver: zodResolver(zLoginInputs),
+        defaultValues: { email: '', password: '' },
+        });
+        const navigation = useNavigation<LoginScreenNavigationProp>();
 
-  const onLogin = (data: ztLoginInputs) => {
-    console.log('Login Data:', data);
-    // Handle login logic here
-  };
-
+        const onLogin = (data: ztLoginInputs) => {
+        console.log('Login Data:', data);
+        // Handle login logic here
+        };
   return (
-    <View className="flex-1 bg-neutral-900 justify-center px-6">
-      <Text className="text-white text-3xl font-bold mb-10">Log in</Text>
-      <View className="bg-neutral-800 rounded-xl p-6">
+    <View className="bg-neutral-800 rounded-xl p-6">
         {/* Email Field */}
         <Controller
           control={control}
@@ -107,6 +102,5 @@ export const LoginScreen: React.FC = () => {
           </Pressable>
         </View>
       </View>
-    </View>
-  );
-};
+  )
+}
