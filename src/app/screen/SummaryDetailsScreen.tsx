@@ -10,6 +10,7 @@ import { SummaryList } from "../../features/summary/components/SummaryList";
 import { Book } from "../../features/summary/components/SummaryCardItem";
 import { SummaryCommentPopup } from "../../features/reader-comment/components/SummaryCommentPopup";
 import { Comment } from "@shared-types/comment.type";
+import { ContentDropdown } from "../../features/summary/components/ContentDropdown";
 
 type SummaryDetailsScreenRouteProp = RouteProp<
   HomeStackParamList,
@@ -91,48 +92,6 @@ const similarBooks: Book[] = [
   },
 ];
 
-const ContentDropdown = ({
-  section,
-  isOpen,
-  onToggle,
-}: {
-  section: SummarySection;
-  isOpen: boolean;
-  onToggle: () => void;
-}) => (
-  <View className="bg-gray-800 rounded-xl mb-4 overflow-hidden shadow-lg">
-    <TouchableOpacity
-      onPress={onToggle}
-      className="p-5 flex-row items-center justify-between bg-gray-800"
-      activeOpacity={0.7}
-    >
-      <View className="flex-row items-center flex-1">
-        <View className="w-10 h-10 rounded-full bg-gray-700 items-center justify-center mr-4">
-          <Text className="text-white text-base font-bold">
-            {String(section.section_order).padStart(2, "0")}
-          </Text>
-        </View>
-        <View className="flex-1">
-          <Text className="text-white font-bold text-lg">{section.title}</Text>
-        </View>
-      </View>
-      <Ionicons
-        name={isOpen ? "chevron-up" : "chevron-down"}
-        size={28}
-        color="#fff"
-      />
-    </TouchableOpacity>
-    {isOpen && (
-      <View className="px-5 pb-6 pt-4 bg-gray-800">
-        <View className="border-t border-gray-700 pt-4">
-          <Text className="text-gray-100 text-base leading-7">
-            {section.content}
-          </Text>
-        </View>
-      </View>
-    )}
-  </View>
-);
 
 // Mock comments data - in real app, fetch this based on summaryId
 const mockComments: Comment[] = [

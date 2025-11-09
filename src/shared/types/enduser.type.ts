@@ -5,6 +5,7 @@ type EndUser = {
   password: string;
   avatar: string;
   bio: string;
+  role?: "reader" | "writer" | "admin";
   createdAt: string;
   updatedAt: string;
 };
