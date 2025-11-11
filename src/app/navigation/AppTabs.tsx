@@ -11,9 +11,8 @@ const Tab = createBottomTabNavigator();
 
 export default function AppTabs() {
   const endUser = useAuthStore((state) => state.endUser);
-  // const isWriter = endUser.role === "writer"
-  const isWriter = false;
-  const isAdmin = true;
+  const isWriter = endUser.role === "writer";
+  const isAdmin = endUser.role === "admin";
 
   return (
     <Tab.Navigator

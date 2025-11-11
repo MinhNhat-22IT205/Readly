@@ -5,10 +5,6 @@ export const zRegisterInputs = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
-    .min(8, { message: "Password must be at least 8 characters" })
-    .regex(/[A-Z]/, { message: "Must contain uppercase" })
-    .regex(/[a-z]/, { message: "Must contain lowercase" })
-    .regex(/[0-9]/, { message: "Must contain a number" })
-    .regex(/[#?!@$%^&*-]/, { message: "Must contain special char" }),
+    .min(6, { message: "Password must be at least 6 characters" }),
 });
 export type ztRegisterInputs = z.infer<typeof zRegisterInputs>;

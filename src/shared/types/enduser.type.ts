@@ -1,32 +1,12 @@
 type EndUser = {
-  _id: string;
+  user_id: string;
   username: string;
   email: string;
-  password: string;
-  avatar: string;
-  bio: string;
-  role?: "reader" | "writer" | "admin";
-  createdAt: string;
-  updatedAt: string;
+  full_name: string;
+  is_active: boolean;
+  role: "reader" | "writer" | "admin";
 };
 
-type EndUserMinimal = Pick<EndUser, "_id" | "username" | "avatar">;
-type EndUserSearchMinimal = Pick<
-  EndUser,
-  "_id" | "username" | "avatar" | "bio"
->;
-type EndUserProfile = {
-  endUser: EndUser;
-  isFriend: boolean;
-};
-type EndUserProfileMinimal = EndUser & {
-  isFriend: boolean;
-};
+type EndUserMinimal = Pick<EndUser, "user_id" | "username">;
 
-export {
-  EndUser,
-  EndUserMinimal,
-  EndUserSearchMinimal,
-  EndUserProfile,
-  EndUserProfileMinimal,
-};
+export { EndUser, EndUserMinimal };

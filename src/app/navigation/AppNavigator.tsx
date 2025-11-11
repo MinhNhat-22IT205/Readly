@@ -17,10 +17,13 @@ export type RootStackParamList = {
 };
 
 export default function AppNavigator() {
+  const access_token = useAuthStore((state) => state.access_token);
   const endUser = useAuthStore((state) => state.endUser);
 
-  // const isLoggedIn = Boolean(endUser._id);
-  const isLoggedIn = true;
+  const isLoggedIn = Boolean(
+    access_token && endUser && Object.keys(endUser).length > 0
+  );
+  // const isLoggedIn = true;
 
   return (
     <NavigationContainer>

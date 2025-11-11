@@ -27,16 +27,14 @@ const mockSummaries: Summary[] = [
   {
     _id: "1",
     title: "Project Management for the Unofficial Project Manager",
-    book_athor: "Kory Kogon, Suzette Blakemore, and James wood",
+    book_athor: "Kory Kogon, Suzette Blakemore, and James Wood",
     book_cover_path:
       "https://images.unsplash.com/photo-1516414447565-b14be0adf13e?w=800",
-    published_date: new Date(),
+    published_date: new Date("2023-10-12"),
     category_id: "cat1",
     user: {
-      _id: "user1",
+      user_id: "user1",
       username: "Current User",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
     },
     status: "writing",
     read_count: 0,
@@ -44,7 +42,8 @@ const mockSummaries: Summary[] = [
       {
         section_order: 1,
         title: "Introduction",
-        content: "Getting started...",
+        content:
+          "Getting started with project management for those who aren't professional project managers, but still need to lead projects to success.",
       },
     ],
     createdAt: new Date("2024-01-15"),
@@ -56,21 +55,20 @@ const mockSummaries: Summary[] = [
     book_athor: "John Smith",
     book_cover_path:
       "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=450&fit=crop",
-    published_date: new Date(),
+    published_date: new Date("2022-09-22"),
     category_id: "cat2",
     user: {
-      _id: "user1",
+      user_id: "user1",
       username: "Current User",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
     },
     status: "waiting_for_approval",
-    read_count: 0,
+    read_count: 200,
     content: [
       {
         section_order: 1,
         title: "Introduction",
-        content: "Content here...",
+        content:
+          "This summary covers the foundational principles of communicating clearly and persuasively in both personal and professional settings.",
       },
     ],
     createdAt: new Date("2024-01-10"),
@@ -82,21 +80,20 @@ const mockSummaries: Summary[] = [
     book_athor: "Jane Doe",
     book_cover_path:
       "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=300&h=450&fit=crop",
-    published_date: new Date(),
+    published_date: new Date("2021-05-15"),
     category_id: "cat3",
     user: {
-      _id: "user1",
+      user_id: "user1",
       username: "Current User",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
     },
     status: "approved",
     read_count: 15000,
     content: [
       {
         section_order: 1,
-        title: "Introduction",
-        content: "Content here...",
+        title: "Modern Leadership",
+        content:
+          "Explore changes in leadership philosophy over the last decade and essential skills for leading effective teams in the digital age.",
       },
     ],
     createdAt: new Date("2024-01-05"),
@@ -108,21 +105,20 @@ const mockSummaries: Summary[] = [
     book_athor: "Mike Johnson",
     book_cover_path:
       "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=450&fit=crop",
-    published_date: new Date(),
+    published_date: new Date("2020-07-01"),
     category_id: "cat4",
     user: {
-      _id: "user1",
+      user_id: "user1",
       username: "Current User",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
     },
     status: "rejected",
     read_count: 0,
     content: [
       {
         section_order: 1,
-        title: "Introduction",
-        content: "Content here...",
+        title: "What Is Digital Transformation?",
+        content:
+          "An overview of the strategies and common pitfalls in digital transformation initiatives in organizations of any size.",
       },
     ],
     createdAt: new Date("2024-01-01"),
@@ -137,7 +133,6 @@ const createSummary = async (data: {
   book_cover_path: string;
   category_id: string;
   userId: string;
-  userAvatar: string;
   username: string;
 }): Promise<string> => {
   // Simulate API call
@@ -169,7 +164,7 @@ export default function WriterSummaryListScreen() {
     ) {
       navigation.navigate("WriterSummaryEditor", { summaryId: summary._id });
     } else {
-      navigation.navigate("SummaryDetails", { bookId: parseInt(summary._id) });
+      navigation.navigate("SummaryDetails", { bookId: summary._id });
     }
   };
 
@@ -195,8 +190,7 @@ export default function WriterSummaryListScreen() {
     try {
       const summaryId = await createSummary({
         ...data,
-        userId: endUser._id,
-        userAvatar: endUser.avatar,
+        userId: endUser.user_id,
         username: endUser.username,
       });
       // Navigate to editor with new summary ID

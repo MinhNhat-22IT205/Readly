@@ -1,21 +1,26 @@
 import React from "react";
 import { ScrollView } from "react-native";
-import { SummaryCardItem, Book } from "./SummaryCardItem";
+import { SummaryCardItem } from "./SummaryCardItem";
+import { Summary } from "@shared-types/summary.type";
 
 export const SummaryList = ({
-  books,
-  onBookPress,
+  summaries,
+  onSummaryPress,
 }: {
-  books: Book[];
-  onBookPress: (book: Book) => void;
+  summaries: Summary[];
+  onSummaryPress: (summary: Summary) => void;
 }) => (
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
     contentContainerClassName="px-4"
   >
-    {books.map((b) => (
-      <SummaryCardItem key={b.id} book={b} onPress={() => onBookPress(b)} />
+    {summaries.map((summary) => (
+      <SummaryCardItem
+        key={summary._id}
+        summary={summary}
+        onPress={() => onSummaryPress(summary)}
+      />
     ))}
   </ScrollView>
 );
