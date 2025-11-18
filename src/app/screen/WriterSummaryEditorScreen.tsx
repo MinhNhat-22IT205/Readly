@@ -4,9 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { WriterStackParamList } from "../navigation/WriterStack";
-import { WriterSummarySectionEditor } from "../../features/summary/components/WriterSummarySectionEditor";
-import { AddSectionButton } from "../../features/summary/components/AddSectionButton";
-import { WriterSummaryEditorHeader } from "../../features/summary/components/WriterSummaryEditorHeader";
+import { WriterSummarySectionEditor } from "../../features/summary/components/writer/WriterSummarySectionEditor";
+import { AddSectionButton } from "../../features/summary/components/writer/AddSectionButton";
+import { WriterSummaryEditorHeader } from "../../features/summary/components/writer/WriterSummaryEditorHeader";
 import { useSummaryEditor } from "../../features/summary/hooks/useSummaryEditor";
 
 type WriterSummaryEditorScreenRouteProp = RouteProp<
@@ -28,9 +28,11 @@ export default function WriterSummaryEditorScreen() {
     sections,
     loading,
     saving,
+    deleting,
     addSection,
     updateSectionField,
     deleteSection,
+    reorderSections,
   } = useSummaryEditor(summaryId);
 
   if (loading || !summary) {
@@ -60,13 +62,18 @@ export default function WriterSummaryEditorScreen() {
       >
         {sections.map((section, index) => (
           <WriterSummarySectionEditor
-            key={`${section.section_order}-${index}`}
+            key={section.id}
             section={section}
             index={index}
             isSaving={saving.has(index)}
+            isDeleting={deleting.has(index)}
             canDelete={sections.length > 1}
+            canMoveUp={index > 0}
+            canMoveDown={index < sections.length - 1}
             onUpdate={updateSectionField}
             onDelete={deleteSection}
+            onMoveUp={() => reorderSections(index, index - 1)}
+            onMoveDown={() => reorderSections(index, index + 1)}
           />
         ))}
 

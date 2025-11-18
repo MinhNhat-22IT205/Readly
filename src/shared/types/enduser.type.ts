@@ -1,12 +1,12 @@
 type EndUser = {
-  user_id: string;
+  id: string;
   username: string;
   email: string;
-  full_name: string;
+  phone: string;
   is_active: boolean;
   role: "reader" | "writer" | "admin";
 };
 
-type EndUserMinimal = Pick<EndUser, "user_id" | "username">;
+type EndUserMinimal = Pick<EndUser, "id" | "username">;
 
 export { EndUser, EndUserMinimal };

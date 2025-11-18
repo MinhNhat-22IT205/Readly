@@ -1,159 +1,99 @@
-import { useState, useEffect, useCallback } from "react";
-import { Alert } from "react-native";
-import { Summary, SummarySection } from "@shared-types/summary.type";
-
-// Mock function to fetch summary - in real app, use API
-const fetchSummary = async (summaryId: string): Promise<Summary> => {
-  // Simulate API call
-  return {
-    _id: summaryId,
-    title: "Project Management for the Unofficial Project Manager",
-    book_athor: "Kory Kogon, Suzette Blakemore, and James wood",
-    book_cover_path:
-      "https://images.unsplash.com/photo-1516414447565-b14be0adf13e?w=800",
-    published_date: new Date(),
-    category_id: "cat1",
-    user: {
-      _id: "user1",
-      username: "Current User",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
-    },
-    status: "writing",
-    read_count: 0,
-    content: [
-      {
-        section_order: 1,
-        title: "Introduction",
-        content: "Getting started with project management...",
-      },
-    ],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-};
-
-// Mock function to update section - in real app, use API
-const updateSection = async (
-  summaryId: string,
-  section: SummarySection
-): Promise<void> => {
-  // Simulate API call
-  console.log("Updating section:", { summaryId, section });
-  // In real app: await api.updateSummarySection(summaryId, section);
-};
+import { useCallback, useMemo } from "react";
+import { ContentSection } from "@shared-types/content_section.type";
+import useFetchSummary from "./useFetchSummary";
+import useFetchSummarySectionList from "./useFetchSummarySectionList";
+import { useSummarySectionManager } from "./useSummarySectionManager";
 
 export const useSummaryEditor = (summaryId: string) => {
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [sections, setSections] = useState<SummarySection[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState<Set<number>>(new Set());
+  const {
+    summary,
+    isLoading: summaryLoading,
+    mutate: mutateSummary,
+  } = useFetchSummary(summaryId);
+  const {
+    sections,
+    isLoading: sectionsLoading,
+    mutate: mutateSections,
+  } = useFetchSummarySectionList(summaryId);
 
-  useEffect(() => {
-    loadSummary();
-  }, [summaryId]);
+  const refreshData = useCallback(() => {
+    mutateSummary();
+    mutateSections();
+  }, [mutateSummary, mutateSections]);
 
-  const loadSummary = async () => {
-    try {
-      setLoading(true);
-      const data = await fetchSummary(summaryId);
-      setSummary(data);
-      setSections([...data.content]);
-    } catch (error) {
-      Alert.alert("Error", "Failed to load summary");
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    createSection,
+    updateSection,
+    deleteSection,
+    reorderSections,
+    saving,
+    deleting,
+  } = useSummarySectionManager(summaryId, refreshData);
 
-  const addSection = useCallback(() => {
-    const newOrder = sections.length + 1;
-    const newSection: SummarySection = {
-      section_order: newOrder,
-      title: "",
-      content: "",
-    };
-    setSections((prev) => [...prev, newSection]);
-  }, [sections.length]);
+  const loading = summaryLoading || sectionsLoading;
 
-  const updateSectionField = useCallback(
+  const sortedSections = useMemo(() => {
+    return [...sections].sort((a, b) => a.section_order - b.section_order);
+  }, [sections]);
+
+  const handleAddSection = useCallback(async () => {
+    const newOrder = sortedSections.length + 1;
+    await createSection(newOrder);
+  }, [sortedSections.length, createSection]);
+
+  const handleUpdateSectionField = useCallback(
     async (index: number, field: "title" | "content", value: string) => {
-      if (!summary) return;
+      const section = sortedSections[index];
+      if (!section) return;
 
-      let updatedSection: SummarySection | null = null;
+      const updates: { title?: string | null; content?: string | null } = {};
+      updates[field] = value || null;
 
-      setSections((prev) => {
-        const updated = [...prev];
-        updated[index] = {
-          ...updated[index],
-          [field]: value,
-        };
-        updatedSection = updated[index];
-        return updated;
-      });
+      await updateSection(section.id, index, updates);
+    },
+    [sortedSections, updateSection]
+  );
 
-      // Update section via API
-      if (
-        updatedSection &&
-        (updatedSection as SummarySection).title.trim() &&
-        (updatedSection as SummarySection).content.trim()
-      ) {
-        setSaving((prev) => new Set(prev).add(index));
-        try {
-          await updateSection(summary._id, updatedSection);
-          setSaving((prev) => {
-            const next = new Set(prev);
-            next.delete(index);
-            return next;
-          });
-        } catch (error) {
-          Alert.alert("Error", "Failed to update section");
-          setSaving((prev) => {
-            const next = new Set(prev);
-            next.delete(index);
-            return next;
-          });
+  const handleDeleteSection = useCallback(
+    async (index: number) => {
+      const section = sortedSections[index];
+      if (!section) return;
+
+      const success = await deleteSection(section.id, index);
+      if (success) {
+        // After deletion, reorder remaining sections
+        const remainingSections = sortedSections.filter((_, i) => i !== index);
+        const sectionIds = remainingSections.map((s) => s.id);
+        if (sectionIds.length > 0) {
+          await reorderSections(sectionIds);
         }
       }
     },
-    [summary]
+    [sortedSections, deleteSection, reorderSections]
   );
 
-  const deleteSection = useCallback((index: number) => {
-    setSections((prev) => {
-      const filtered = prev.filter((_, i) => i !== index);
-      const reordered = filtered.map((section, i) => ({
-        ...section,
-        section_order: i + 1,
-      }));
-      return reordered;
-    });
+  const handleReorderSections = useCallback(
+    async (fromIndex: number, toIndex: number) => {
+      const newSections = [...sortedSections];
+      const [moved] = newSections.splice(fromIndex, 1);
+      newSections.splice(toIndex, 0, moved);
 
-    // Clean up saving state for deleted section and adjust indices
-    setSaving((prev) => {
-      const next = new Set<number>();
-      prev.forEach((savingIndex) => {
-        if (savingIndex < index) {
-          // Keep indices before deleted item
-          next.add(savingIndex);
-        } else if (savingIndex > index) {
-          // Shift indices after deleted item
-          next.add(savingIndex - 1);
-        }
-        // Skip the deleted index
-      });
-      return next;
-    });
-  }, []);
+      // Reorder via the reorder endpoint (this will update section_order for all sections)
+      const sectionIds = newSections.map((s) => s.id);
+      await reorderSections(sectionIds);
+    },
+    [sortedSections, reorderSections]
+  );
 
   return {
     summary,
-    sections,
+    sections: sortedSections,
     loading,
     saving,
-    addSection,
-    updateSectionField,
-    deleteSection,
+    deleting,
+    addSection: handleAddSection,
+    updateSectionField: handleUpdateSectionField,
+    deleteSection: handleDeleteSection,
+    reorderSections: handleReorderSections,
   };
 };

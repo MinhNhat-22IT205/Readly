@@ -9,10 +9,10 @@ interface AuthStore {
   setEndUser: (endUser: EndUser) => void;
 }
 const initialEndUser: EndUser = {
-  user_id: "",
+  id: "",
   username: "",
   email: "",
-  full_name: "",
+  phone: "",
   is_active: false,
   role: "reader",
 };

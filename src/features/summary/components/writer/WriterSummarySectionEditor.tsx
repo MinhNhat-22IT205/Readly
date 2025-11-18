@@ -1,24 +1,34 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SummarySection } from "@shared-types/summary.type";
+import { ContentSection } from "@shared-types/content_section.type";
 
 interface WriterSummarySectionEditorProps {
-  section: SummarySection;
+  section: ContentSection;
   index: number;
   isSaving: boolean;
+  isDeleting?: boolean;
   canDelete: boolean;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
   onUpdate: (index: number, field: "title" | "content", value: string) => void;
   onDelete: (index: number) => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 }
 
 export const WriterSummarySectionEditor = ({
   section,
   index,
   isSaving,
+  isDeleting = false,
   canDelete,
+  canMoveUp = false,
+  canMoveDown = false,
   onUpdate,
   onDelete,
+  onMoveUp,
+  onMoveDown,
 }: WriterSummarySectionEditorProps) => {
   const handleDelete = () => {
     Alert.alert(
@@ -53,10 +63,35 @@ export const WriterSummarySectionEditor = ({
           {isSaving && (
             <Ionicons name="sync" size={16} color="#4F46E5" />
           )}
+          {isDeleting && (
+            <Ionicons name="hourglass-outline" size={16} color="#9CA3AF" />
+          )}
+          {/* Reorder Buttons */}
+          <View className="flex-row items-center gap-1">
+            {canMoveUp && onMoveUp && (
+              <TouchableOpacity
+                onPress={onMoveUp}
+                className="w-8 h-8 rounded-full bg-gray-700 items-center justify-center"
+                disabled={isSaving || isDeleting}
+              >
+                <Ionicons name="chevron-up" size={16} color="#FFFFFF" />
+              </TouchableOpacity>
+            )}
+            {canMoveDown && onMoveDown && (
+              <TouchableOpacity
+                onPress={onMoveDown}
+                className="w-8 h-8 rounded-full bg-gray-700 items-center justify-center"
+                disabled={isSaving || isDeleting}
+              >
+                <Ionicons name="chevron-down" size={16} color="#FFFFFF" />
+              </TouchableOpacity>
+            )}
+          </View>
           {canDelete && (
             <TouchableOpacity
               onPress={handleDelete}
               className="w-8 h-8 rounded-full bg-red-500/20 items-center justify-center"
+              disabled={isDeleting}
             >
               <Ionicons name="trash-outline" size={16} color="#EF4444" />
             </TouchableOpacity>
@@ -68,7 +103,7 @@ export const WriterSummarySectionEditor = ({
       <TextInput
         placeholder="Section Title"
         placeholderTextColor="#6B7280"
-        value={section.title}
+        value={section.title || ""}
         onChangeText={(text) => onUpdate(index, "title", text)}
         className="bg-gray-700 text-white rounded-lg px-4 py-3 mb-3 text-base"
         style={{ color: "#FFFFFF" }}
@@ -78,7 +113,7 @@ export const WriterSummarySectionEditor = ({
       <TextInput
         placeholder="Section Content"
         placeholderTextColor="#6B7280"
-        value={section.content}
+        value={section.content || ""}
         onChangeText={(text) => onUpdate(index, "content", text)}
         multiline
         numberOfLines={6}

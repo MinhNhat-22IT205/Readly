@@ -32,7 +32,7 @@ export default function LoginForm() {
     defaultValues: { email: "", password: "" },
   });
   const navigation = useNavigation<LoginScreenNavigationProp>();
-  const setEndUser = useAuthStore((state) => state.setEndUser);
+  const { setEndUser, setToken } = useAuthStore((state) => state);
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,8 +48,9 @@ export default function LoginForm() {
         return;
       }
       //TODO: handle the result
-      // setEndUser()
-      // setToken(result.token);
+      setEndUser(result.user);
+      setToken(result.access_token);
+      navigation.navigate("Home");
       // TODO: Navigate to the desired screen after successful login.
     } catch (error) {
       setApiError("Something went wrong. Please try again.");

@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { WriterSummaryList } from "../../features/summary/components/WriterSummaryList";
+import { WriterSummaryList } from "../../features/summary/components/writer/WriterSummaryList";
 import { Summary } from "@shared-types/summary.type";
 import { AdminStackParamList } from "../navigation/AdminStack";
 
@@ -99,4 +99,3 @@ export default function AdminSummaryListScreen() {
     </SafeAreaView>
   );
 }
-

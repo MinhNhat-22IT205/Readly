@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Summary } from "@shared-types/summary.type";
+import { Summary, SummaryPopulated } from "@shared-types/summary.type";
 
 interface WriterSummaryItemProps {
-  summary: Summary;
+  summary: SummaryPopulated;
   onPress: () => void;
 }
 
@@ -48,7 +48,7 @@ export const WriterSummaryItem = ({
     activeOpacity={0.7}
   >
     <Image
-      source={{ uri: summary.book_cover_path }}
+      source={{ uri: summary.book.cover_image }}
       className="w-24 h-32 rounded-lg bg-gray-700"
     />
     <View className="flex-1 ml-4 justify-between">
@@ -62,7 +62,7 @@ export const WriterSummaryItem = ({
           </Text>
         </View>
         <Text className="text-gray-400 text-sm mb-2" numberOfLines={1}>
-          {summary.book_athor}
+          {summary.book.author.name}
         </Text>
         <View className="flex-row items-center gap-4 mb-2">
           <View className="flex-row items-center gap-1">
@@ -71,12 +71,12 @@ export const WriterSummaryItem = ({
               {summary.read_count.toLocaleString()}
             </Text>
           </View>
-          <View className="flex-row items-center gap-1">
+          {/* <View className="flex-row items-center gap-1">
             <Ionicons name="document-text-outline" size={14} color="#9CA3AF" />
             <Text className="text-gray-400 text-xs">
-              {summary.content.length} sections
+              {summary.content_sections.length} sections
             </Text>
-          </View>
+          </View> */}
         </View>
       </View>
       <View className="flex-row items-center justify-between">
@@ -88,7 +88,7 @@ export const WriterSummaryItem = ({
           </Text>
         </View>
         <Text className="text-gray-500 text-xs">
-          {new Date(summary.updatedAt).toLocaleDateString()}
+          {new Date(summary.published_date).toLocaleDateString()}
         </Text>
       </View>
     </View>

@@ -17,7 +17,7 @@ export const SummaryList = ({
   >
     {summaries.map((summary) => (
       <SummaryCardItem
-        key={summary._id}
+        key={summary.id}
         summary={summary}
         onPress={() => onSummaryPress(summary)}
       />

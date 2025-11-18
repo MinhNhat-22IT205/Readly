@@ -39,10 +39,8 @@ const fetchSummary = async (summaryId: string): Promise<Summary> => {
     published_date: new Date(),
     category_id: "cat2",
     user: {
-      _id: "user1",
+      user_id: "user1",
       username: "Writer User",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
     },
     status: "waiting_for_approval",
     read_count: 0,
@@ -230,7 +228,9 @@ export default function AdminSummaryDetailScreen() {
         {/* Author Section */}
         <View className="mx-4 mt-4 bg-gray-800 rounded-lg p-4 flex-row">
           <Image
-            source={{ uri: summary.user.avatar }}
+            source={{
+              uri: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
+            }}
             className="w-14 h-14 rounded-full"
           />
           <View className="ml-4 flex-1">

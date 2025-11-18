@@ -8,9 +8,15 @@ import { axiosInstance } from "@shared-libs/axios/axios.base";
 import { ztRegisterInputs } from "../libs/register.zod";
 import { ServerError } from "@shared-types/server-error.type";
 
-const login = async (values: ztLoginInputs): Promise<EndUser | ServerError> => {
+type LoginResponse = {
+  access_token: string;
+  token_type: string;
+  user: EndUser;
+};
+
+const login = async (values: ztLoginInputs): Promise<LoginResponse> => {
   try {
-    const result = await axiosInstance.post<EndUser>(
+    const result = await axiosInstance.post<LoginResponse>(
       LOGIN_API_ENDPOINT,
       values
     );
@@ -20,9 +26,7 @@ const login = async (values: ztLoginInputs): Promise<EndUser | ServerError> => {
   }
 };
 
-const register = async (
-  values: ztRegisterInputs
-): Promise<EndUser | ServerError> => {
+const register = async (values: ztRegisterInputs): Promise<EndUser> => {
   try {
     const result = await axiosInstance.post<EndUser>(
       REGISTER_API_ENDPOINT,

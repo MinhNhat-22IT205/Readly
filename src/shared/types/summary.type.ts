@@ -1,23 +1,22 @@
-import { EndUserMinimal } from "./enduser.type";
+import { BookPopulated } from "./book.type";
+import { ContentSection } from "./content_section.type";
+import { EndUser, EndUserMinimal } from "./enduser.type";
 
 type Summary = {
-  _id: string;
+  id: string;
   title: string;
-  book_athor: string;
-  book_cover_path: string;
+  book_id: string;
   published_date: Date;
-  category_id: string;
-  user: EndUserMinimal;
+  user_id: string;
   status: "writing" | "waiting_for_approval" | "approved" | "rejected";
   read_count: number;
-  content: SummarySection[];
-  createdAt: Date;
-  updatedAt: Date;
-};
-type SummarySection = {
-  section_order: number;
-  title: string;
-  content: string;
+  audio_url: string;
+  avg_rating: number;
+  created_at: Date;
 };
 
-export { Summary, SummarySection };
+type SummaryPopulated = Summary & {
+  book: BookPopulated;
+  user: EndUser;
+};
+export type { Summary, SummaryPopulated };
