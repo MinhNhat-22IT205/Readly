@@ -1,5 +1,4 @@
 import { create } from "zustand";
-// import { devtools } from "zustand/middleware"; // <-- Remove this
 import { EndUser } from "../../types/enduser.type";
 
 interface AuthStore {
@@ -7,6 +6,7 @@ interface AuthStore {
   access_token: string;
   setToken: (token: string) => void;
   setEndUser: (endUser: EndUser) => void;
+  clearAuth: () => void;
 }
 const initialEndUser: EndUser = {
   id: "",
