@@ -7,7 +7,7 @@ export const PublicCommentList = ({ comments }: { comments: Comment[] }) => (
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
-    contentContainerClassName="px-4 mt-4"
+    contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16 }}
   >
     {comments.map((comment) => (
       <PublicCommentCardItem key={comment._id} comment={comment} />

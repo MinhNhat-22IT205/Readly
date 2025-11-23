@@ -33,7 +33,7 @@ const fetchSummary = async (summaryId: string): Promise<Summary> => {
   return {
     _id: summaryId,
     title: "The Art of Effective Communication",
-    book_athor: "John Smith",
+    book_author: "John Smith",
     book_cover_path:
       "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=450&fit=crop",
     published_date: new Date(),
@@ -171,7 +171,7 @@ export default function AdminSummaryDetailScreen() {
         {/* Title Section */}
         <View className="px-4 mt-6">
           <Text className="text-white text-2xl font-bold">{summary.title}</Text>
-          <Text className="text-gray-400 mt-2">{summary.book_athor}</Text>
+          <Text className="text-gray-400 mt-2">{summary.book_author}</Text>
           <Text className="text-gray-500 text-sm mt-1">
             {summary.user.username}
           </Text>
@@ -207,7 +207,7 @@ export default function AdminSummaryDetailScreen() {
             {summary.content.length} Sections
           </Text>
 
-          {summary.content.map((section) => (
+          {summary.content.map((section: any) => (
             <ContentDropdown
               key={section.section_order}
               section={section}
@@ -237,7 +237,7 @@ export default function AdminSummaryDetailScreen() {
             <Text className="text-white font-bold text-base">
               {summary.user.username}
             </Text>
-            <Text className="text-gray-500 text-sm">{summary.book_athor}</Text>
+            <Text className="text-gray-500 text-sm">{summary.book_author}</Text>
             <Text className="text-gray-400 text-sm mt-2">
               Writer who creates engaging summaries
             </Text>
