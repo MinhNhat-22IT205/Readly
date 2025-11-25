@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StatusBar,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -14,63 +15,60 @@ import { WriterSummaryList } from "../../features/summary/components/writer/Writ
 import { CreateSummaryForm } from "../../features/summary/components/writer/CreateSummaryForm";
 import { Summary } from "@shared-types/summary.type";
 import { WriterStackParamList } from "../navigation/WriterStack";
-import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import useFetchWriterSummaryList from "@features/summary/hooks/useFetchWriterSummaryList";
+import { createSummary } from "@features/summary/api/summary.api";
 
 type WriterSummaryListScreenNavigationProp =
   NativeStackNavigationProp<WriterStackParamList>;
 
-// Mock function to create summary - in real app, use API
-const createSummary = async (data: {
-  title: string;
-  book_athor: string;
-  book_cover_path: string;
-  category_id: string;
-  userId: string;
-  username: string;
-}): Promise<string> => {
-  // Simulate API call
-  const newSummaryId = Date.now().toString();
-  console.log("Creating summary:", { ...data, summaryId: newSummaryId });
-  // In real app: const response = await api.createSummary(data);
-  // return response._id;
-  return newSummaryId;
-};
-
 export default function WriterSummaryListScreen() {
   const navigation = useNavigation<WriterSummaryListScreenNavigationProp>();
-  const endUser = useAuthStore((state) => state.endUser);
   const [isCreateFormVisible, setIsCreateFormVisible] = useState(false);
-  const { summaries = [] } = useFetchWriterSummaryList();
+  const { summaries, mutate: mutateSummaries } = useFetchWriterSummaryList();
 
+  // Fix type: handle undefined summary.id and correct Summary type if needed
   const handleSummaryPress = (summary: Summary) => {
+    const summaryId = summary.id ?? "";
+    // Only navigate if summaryId actually exists
+    if (!summaryId) {
+      console.warn("Summary missing id:", summary);
+      return;
+    }
     // Navigate to editor screen for writing/pending summaries, details for approved
     if (
-      summary.status === "writing" ||
+      summary.status === "editing" ||
       summary.status === "waiting_for_approval"
     ) {
-      navigation.navigate("WriterSummaryEditor", { summaryId: summary.id });
+      navigation.navigate("WriterSummaryEditor", { summaryId });
     } else {
-      navigation.navigate("SummaryDetails", { bookId: summary.id });
+      navigation.navigate("SummaryDetails", { summaryId });
     }
   };
 
   const handleCreateSummary = async (data: {
     title: string;
-    book_athor: string;
-    book_cover_path: string;
-    category_id: string;
+    book_id: number;
   }) => {
     try {
-      const summaryId = await createSummary({
-        ...data,
-        userId: endUser.id,
-        username: endUser.username,
+      const newSummary = await createSummary({
+        title: data.title,
+        book_id: data.book_id,
+        status: "editing",
       });
+      await mutateSummaries();
+      const summaryIdentifier = newSummary?.id ?? newSummary?._id;
+      const summaryId = summaryIdentifier ? summaryIdentifier.toString() : "";
+      if (!summaryId) {
+        throw new Error("Summary id missing in response");
+      }
       // Navigate to editor with new summary ID
       navigation.navigate("WriterSummaryEditor", { summaryId });
     } catch (error) {
       console.error("Failed to create summary:", error);
+      Alert.alert(
+        "Error",
+        "We couldn't create the summary right now. Please try again."
+      );
     }
   };
 
@@ -88,7 +86,7 @@ export default function WriterSummaryListScreen() {
 
       {/* Summaries List */}
       <WriterSummaryList
-        summaries={summaries}
+        summaries={summaries ?? []}
         onSummaryPress={handleSummaryPress}
       />
 

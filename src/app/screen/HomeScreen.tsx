@@ -1,17 +1,24 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, StatusBar, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StatusBar,
+  TouchableOpacity,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SummaryList } from "../../features/summary/components/SummaryList";
 import { SectionHeader } from "../../features/summary/components/SectionHeader";
 import { Comment } from "@shared-types/comment.type";
-import { Summary } from "@shared-types/summary.type";
+import { Summary, SummaryPopulated } from "@shared-types/summary.type";
 import { HomeStackParamList } from "../navigation/HomeStack";
 import { PublicCommentList } from "@features/reader-comment/components/PublicCommentList";
 import useFetchApprovedSummaryList from "@features/summary/hooks/useFetchApprovedSummaryList";
 import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   HomeStackParamList,
@@ -25,8 +32,9 @@ export default function HomeScreen() {
     useFetchApprovedSummaryList();
   const clearAuth = useAuthStore((s) => s.clearAuth);
 
-  const handleSummaryPress = (summary: Summary) => {
-    navigation.navigate("SummaryDetails", { bookId: summary.id ?? "" });
+  const handleSummaryPress = (summary: SummaryPopulated) => {
+    console.log(summary.id);
+    navigation.navigate("SummaryDetails", { summaryId: summary.id ?? "" });
   };
 
   const handleLogout = async () => {
@@ -45,7 +53,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-neutral-900">
+    <SafeAreaView className="flex-1 bg-neutral-900">
       <StatusBar barStyle="light-content" />
 
       {/* Header */}
@@ -100,6 +108,6 @@ export default function HomeScreen() {
           onSummaryPress={handleSummaryPress}
         />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

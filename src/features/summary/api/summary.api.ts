@@ -1,6 +1,7 @@
 import { SummaryPopulated } from "@shared-types/summary.type";
 import { ContentSection } from "@shared-types/content_section.type";
 import { axiosInstance } from "@shared-libs/axios/axios.base";
+import { SUMMARY_ENDPOINT } from "./summary-endpoints.api";
 import {
   GET_SUMMARY_CONTENT_SECTIONS_API_ENDPOINT,
   CREATE_CONTENT_SECTION_API_ENDPOINT,
@@ -29,6 +30,23 @@ export const fetchWriterSummaries = async (): Promise<SummaryPopulated[]> => {
 export const fetchApprovedSummaries = async (): Promise<SummaryPopulated[]> => {
   const response = await axiosInstance.get<SummaryPopulated[]>(
     "/summaries/?status_filter=approved"
+  );
+  return response.data;
+};
+
+export interface CreateSummaryPayload {
+  title: string;
+  book_id: number;
+  status?: string;
+  audio_url?: string | null;
+}
+
+export const createSummary = async (
+  payload: CreateSummaryPayload
+): Promise<SummaryPopulated> => {
+  const response = await axiosInstance.post<SummaryPopulated>(
+    SUMMARY_ENDPOINT,
+    payload
   );
   return response.data;
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ContentSection } from "@shared-types/content_section.type";
@@ -30,6 +30,31 @@ export const WriterSummarySectionEditor = ({
   onMoveUp,
   onMoveDown,
 }: WriterSummarySectionEditorProps) => {
+  const [titleValue, setTitleValue] = useState(section.title ?? "");
+  const [contentValue, setContentValue] = useState(section.content ?? "");
+
+  useEffect(() => {
+    setTitleValue(section.title ?? "");
+  }, [section.title]);
+
+  useEffect(() => {
+    setContentValue(section.content ?? "");
+  }, [section.content]);
+
+  const handleTitleBlur = () => {
+    if (titleValue === (section.title ?? "")) {
+      return;
+    }
+    onUpdate(index, "title", titleValue);
+  };
+
+  const handleContentBlur = () => {
+    if (contentValue === (section.content ?? "")) {
+      return;
+    }
+    onUpdate(index, "content", contentValue);
+  };
+
   const handleDelete = () => {
     Alert.alert(
       "Delete Section",
@@ -103,8 +128,9 @@ export const WriterSummarySectionEditor = ({
       <TextInput
         placeholder="Section Title"
         placeholderTextColor="#6B7280"
-        value={section.title || ""}
-        onChangeText={(text) => onUpdate(index, "title", text)}
+        value={titleValue}
+        onChangeText={setTitleValue}
+        onBlur={handleTitleBlur}
         className="bg-gray-700 text-white rounded-lg px-4 py-3 mb-3 text-base"
         style={{ color: "#FFFFFF" }}
       />
@@ -113,8 +139,9 @@ export const WriterSummarySectionEditor = ({
       <TextInput
         placeholder="Section Content"
         placeholderTextColor="#6B7280"
-        value={section.content || ""}
-        onChangeText={(text) => onUpdate(index, "content", text)}
+        value={contentValue}
+        onChangeText={setContentValue}
+        onBlur={handleContentBlur}
         multiline
         numberOfLines={6}
         textAlignVertical="top"

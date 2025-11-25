@@ -1,17 +1,27 @@
 import React, { useState } from "react";
-import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { HomeStackParamList } from "../navigation/HomeStack";
-import { Summary, SummarySection } from "@shared-types/summary.type";
+// import { Summary, SummarySection } from "@shared-types/summary.type";
 import { SummaryList } from "../../features/summary/components/SummaryList";
-import { Book } from "../../features/summary/components/SummaryCardItem";
+// import { Book } from "../../features/summary/components/SummaryCardItem";
 import { SummaryCommentPopup } from "../../features/reader-comment/components/SummaryCommentPopup";
-import { Comment } from "@shared-types/comment.type";
+// import { Comment } from "@shared-types/comment.type";
 import { ContentDropdown } from "../../features/summary/components/ContentDropdown";
+import useFetchSummary from "@features/summary/hooks/useFetchSummary";
+import useFetchSummarySectionList from "@features/summary/hooks/useFetchSummarySectionList";
 
+// Types
 type SummaryDetailsScreenRouteProp = RouteProp<
   HomeStackParamList,
   "SummaryDetails"
@@ -21,145 +31,31 @@ type SummaryDetailsScreenNavigationProp = NativeStackNavigationProp<
   "SummaryDetails"
 >;
 
-// Mock summary data - in real app, fetch this based on bookId
-const mockSummary: Summary = {
-  _id: "summary1",
-  title: "Project Management for the Unofficial Project Manager",
-  book_athor: "Kory Kogon, Suzette Blakemore, and James wood",
-  book_cover_path:
-    "https://images.unsplash.com/photo-1516414447565-b14be0adf13e?w=800",
-  published_date: new Date(),
-  category_id: "cat1",
-  user: {
-    _id: "author1",
-    username: "James wood",
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
-  },
-  status: "approved",
-  read_count: 18000000,
-  content: [
-    {
-      section_order: 1,
-      title: "Introduction",
-      content:
-        "Getting Along (2022) describes the importance of workplace interactions and their effects on productivity and creativity. This book provides practical strategies for managing difficult relationships at work.",
-    },
-    {
-      section_order: 2,
-      title: "Creating the Foundation",
-      content:
-        "The foundation of effective workplace relationships starts with understanding different personality types and communication styles. Managers who want to create positive work environments must first recognize the diverse needs of their team members.",
-    },
-    {
-      section_order: 3,
-      title: "Key Strategies",
-      content:
-        "Key strategies include active listening, empathy, and setting clear boundaries. These techniques help navigate complex interpersonal dynamics while maintaining professional relationships.",
-    },
-  ],
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
-
-const similarBooks: Book[] = [
-  {
-    id: 1,
-    title: "Explore your create...",
-    author: "Royryan Mercado",
-    duration: "5m",
-    views: "5m",
-    image:
-      "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=450&fit=crop",
-  },
-  {
-    id: 2,
-    title: "Futurama",
-    author: "Michael Douglas jr",
-    duration: "5m",
-    views: "5m",
-    image:
-      "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=300&h=450&fit=crop",
-  },
-  {
-    id: 3,
-    title: "The good guy",
-    author: "Mark mcallister",
-    duration: "5m",
-    views: "5m",
-    image:
-      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=450&fit=crop",
-  },
-];
-
-
-// Mock comments data - in real app, fetch this based on summaryId
-const mockComments: Comment[] = [
-  {
-    _id: "comment1",
-    summary: mockSummary,
-    endUser: {
-      _id: "user1",
-      username: "John Doe",
-      avatar:
-        "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&h=400&fit=crop",
-    },
-    content:
-      "This book really helped me understand project management better. The strategies are practical and easy to implement.",
-    access: "public",
-    createdAt: new Date(),
-  },
-  {
-    _id: "comment2",
-    summary: mockSummary,
-    endUser: {
-      _id: "user2",
-      username: "Jane Smith",
-      avatar:
-        "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop",
-    },
-    content:
-      "Excellent read! The author's approach to workplace relationships is insightful and well-researched.",
-    access: "public",
-    createdAt: new Date(),
-  },
-  {
-    _id: "comment3",
-    summary: mockSummary,
-    endUser: {
-      _id: "user3",
-      username: "Bob Johnson",
-      avatar:
-        "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop",
-    },
-    content:
-      "I've recommended this to my entire team. The concepts are clear and the examples are relatable.",
-    access: "public",
-    createdAt: new Date(),
-  },
-  {
-    _id: "comment4",
-    summary: mockSummary,
-    endUser: {
-      _id: "user4",
-      username: "Alice Williams",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
-    },
-    content:
-      "A must-read for anyone in management. The practical tips have already improved my team's dynamics.",
-    access: "public",
-    createdAt: new Date(),
-  },
-];
-
 export default function SummaryDetailsScreen() {
   const route = useRoute<SummaryDetailsScreenRouteProp>();
   const navigation = useNavigation<SummaryDetailsScreenNavigationProp>();
-  const { bookId } = route.params;
-  const [summary] = useState<Summary>(mockSummary);
+  const { summaryId } = route.params;
+  const { summary, isLoading: isSummaryLoading } = useFetchSummary(summaryId);
+  const { sections, isLoading: isSectionsLoading } =
+    useFetchSummarySectionList(summaryId);
+
   const [openSections, setOpenSections] = useState<Set<number>>(new Set());
   const [isCommentPopupVisible, setIsCommentPopupVisible] = useState(false);
+
+  // Placeholder for comments since fetching comments is not shown in the code/context
+  const mockComments: any[] = []; // Replace with fetched comments if available
+
+  // Placeholder for similar books/summaries, to be replaced by real data
+  const similarSummaries: any[] = []; // You should fetch and pass as summaries
+
+  // Helper safely get
+  const book = summary?.book;
+  const bookCoverUrl = book?.cover_image || "";
+  const bookTitle = book?.title || "";
+  const bookAuthor = book?.author?.name || book?.author.name || "";
+  const bookAuthorBio = book?.author?.biography || book?.author.biography || "";
+  const bookPublisher = book?.publisher?.name || book?.publisher.name || "";
+  const user = summary?.user;
 
   const toggleSection = (order: number) => {
     const newOpenSections = new Set(openSections);
@@ -171,9 +67,27 @@ export default function SummaryDetailsScreen() {
     setOpenSections(newOpenSections);
   };
 
-  const handleBookPress = (book: Book) => {
-    navigation.navigate("SummaryDetails", { bookId: book.id });
+  // Updated: handleBookPress expects summaryId from summary
+  const handleBookPress = (summary: any) => {
+    navigation.navigate("SummaryDetails", { summaryId: summary.id });
   };
+
+  if (isSummaryLoading || isSectionsLoading) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-gray-900">
+        <ActivityIndicator size="large" color="#6366F1" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!summary) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-gray-900">
+        <Text className="text-white">Summary not found.</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-gray-900">
       <ScrollView className="flex-1">
@@ -182,28 +96,31 @@ export default function SummaryDetailsScreen() {
           {/* Blurred Background */}
           <View className="h-64 bg-gray-800">
             <Image
-              source={{ uri: summary.book_cover_path }}
+              source={bookCoverUrl ? { uri: bookCoverUrl } : undefined}
               className="w-full h-full opacity-30"
               blurRadius={10}
             />
           </View>
-
           {/* Book Cover */}
           <View className="absolute bottom-0 left-0 right-0 items-center pb-4">
             <View
               className="bg-indigo-900 rounded-lg overflow-hidden shadow-2xl"
               style={{ width: 160, height: 240 }}
             >
-              <View className="flex-1 items-center justify-center p-4">
-                <Text className="text-white text-3xl font-bold tracking-wider">
-                  FUTURAMA
-                </Text>
-                <View className="mt-4 w-full h-32 bg-gradient-to-b from-orange-400 via-orange-300 to-yellow-200 rounded">
-                  <View className="absolute bottom-4 left-1/2 -translate-x-1/2">
-                    <View className="w-8 h-16 bg-blue-400 rounded-t-full" />
-                  </View>
+              {bookCoverUrl ? (
+                <Image
+                  source={{ uri: bookCoverUrl }}
+                  style={{ width: "100%", height: "100%" }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View className="flex-1 items-center justify-center p-4">
+                  <Text className="text-white text-3xl font-bold tracking-wider">
+                    {bookTitle || "BOOK"}
+                  </Text>
+                  <View className="mt-4 w-full h-32 bg-gradient-to-b from-orange-400 via-orange-300 to-yellow-200 rounded" />
                 </View>
-              </View>
+              )}
             </View>
           </View>
         </View>
@@ -222,11 +139,9 @@ export default function SummaryDetailsScreen() {
 
         {/* Title Section */}
         <View className="px-4 mt-6">
-          <Text className="text-white text-2xl font-bold">{summary.title}</Text>
-          <Text className="text-gray-400 mt-2">{summary.book_athor}</Text>
-          <Text className="text-gray-500 text-sm mt-1">
-            {summary.user.username}
-          </Text>
+          <Text className="text-white text-2xl font-bold">{bookTitle}</Text>
+          <Text className="text-gray-400 mt-2">{bookAuthor}</Text>
+          <Text className="text-gray-500 text-sm mt-1">{user?.username}</Text>
         </View>
 
         {/* Stats */}
@@ -238,7 +153,7 @@ export default function SummaryDetailsScreen() {
           <View className="flex-row items-center">
             <Ionicons name="bulb-outline" size={18} color="#9CA3AF" />
             <Text className="text-gray-400 ml-2">
-              {summary.content.length} key ideas
+              {sections.length} key ideas
             </Text>
           </View>
         </View>
@@ -265,10 +180,10 @@ export default function SummaryDetailsScreen() {
         {/* Content Sections */}
         <View className="px-4 mt-8">
           <Text className="text-white text-xl font-bold mb-6">
-            {summary.content.length} Sections
+            {sections.length} Sections
           </Text>
 
-          {summary.content.map((section) => (
+          {sections.map((section) => (
             <ContentDropdown
               key={section.section_order}
               section={section}
@@ -276,45 +191,34 @@ export default function SummaryDetailsScreen() {
               onToggle={() => toggleSection(section.section_order)}
             />
           ))}
-
-          {/* Final Summary */}
-          <TouchableOpacity className="bg-gray-800 rounded-lg p-4 mb-3 flex-row items-center justify-between">
-            <Text className="text-white font-semibold text-base">
-              Final Summary
-            </Text>
-            <Ionicons name="chevron-forward" size={24} color="#6B7280" />
-          </TouchableOpacity>
         </View>
 
         {/* Author Section */}
         <View className="mx-4 mt-4 bg-gray-800 rounded-lg p-4 flex-row">
-          <Image
-            source={{ uri: summary.user.avatar }}
-            className="w-14 h-14 rounded-full"
-          />
+          <Image source={""} className="w-14 h-14 rounded-full" />
           <View className="ml-4 flex-1">
-            <Text className="text-white font-bold text-base">
-              {summary.user.username}
-            </Text>
-            <Text className="text-gray-500 text-sm">{summary.book_athor}</Text>
-            <Text className="text-gray-400 text-sm mt-2">
-              Managers who want to create positive work environments
-            </Text>
+            <Text className="text-white font-bold text-base">{bookAuthor}</Text>
+            <Text className="text-gray-500 text-sm">{bookAuthor}</Text>
+            <Text className="text-gray-400 text-sm mt-2">{bookAuthorBio}</Text>
           </View>
         </View>
 
-        {/* Similar Books */}
-        <View className="mt-8 mb-6">
+        {/* Similar Summaries */}
+        {/* <View className="mt-8 mb-6">
           <View className="flex-row justify-between items-center px-4 mb-4">
-            <Text className="text-white text-lg font-bold">Similar Books</Text>
+            <Text className="text-white text-lg font-bold">
+              Similar Summaries
+            </Text>
             <TouchableOpacity className="flex-row items-center">
               <Text className="text-gray-400 mr-1">Show all</Text>
               <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
             </TouchableOpacity>
           </View>
-          <SummaryList books={similarBooks} onBookPress={handleBookPress} />
-        </View>
-
+          <SummaryList
+            summaries={similarSummaries}
+            onSummaryPress={handleBookPress}
+          />
+        </View> */}
         {/* Bottom Spacing */}
         <View className="h-24" />
       </ScrollView>

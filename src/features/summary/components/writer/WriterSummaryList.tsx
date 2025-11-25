@@ -13,7 +13,7 @@ interface WriterSummaryListProps {
 
 const statusFilters: { label: string; value: StatusFilter }[] = [
   { label: "All", value: "all" },
-  { label: "Writing", value: "writing" },
+  { label: "Writing", value: "editing" },
   { label: "Pending", value: "waiting_for_approval" },
   { label: "Approved", value: "approved" },
   { label: "Rejected", value: "rejected" },

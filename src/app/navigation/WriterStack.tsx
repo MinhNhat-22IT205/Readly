@@ -7,7 +7,7 @@ import SummaryDetailsScreen from "@app/screen/SummaryDetailsScreen";
 export type WriterStackParamList = {
   WriterSummaryList: undefined;
   WriterSummaryEditor: { summaryId: string };
-  SummaryDetails: { bookId: string };
+  SummaryDetails: { summaryId: string };
 };
 
 const Stack = createNativeStackNavigator<WriterStackParamList>();
@@ -27,4 +27,3 @@ export default function WriterStack() {
     </Stack.Navigator>
   );
 }
-

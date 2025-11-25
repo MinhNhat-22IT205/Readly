@@ -8,7 +8,7 @@ export const SummaryList = ({
   onSummaryPress,
 }: {
   summaries: SummaryPopulated[];
-  onSummaryPress: (summary: Summary) => void;
+  onSummaryPress: (summary: SummaryPopulated) => void;
 }) => (
   <ScrollView
     horizontal

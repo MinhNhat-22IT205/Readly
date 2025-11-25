@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from "react";
-import { ContentSection } from "@shared-types/content_section.type";
 import useFetchSummary from "./useFetchSummary";
 import useFetchSummarySectionList from "./useFetchSummarySectionList";
 import { useSummarySectionManager } from "./useSummarySectionManager";
@@ -39,7 +38,7 @@ export const useSummaryEditor = (summaryId: string) => {
   const handleAddSection = useCallback(async () => {
     const newOrder = sortedSections.length + 1;
     await createSection(newOrder);
-  }, [sortedSections.length, createSection]);
+  }, [sortedSections, createSection]);
 
   const handleUpdateSectionField = useCallback(
     async (index: number, field: "title" | "content", value: string) => {

@@ -49,8 +49,7 @@ export default function LoginForm() {
         return;
       }
 
-      const token =
-        (result as any)?.access_token || (result as any)?.token;
+      const token = (result as any)?.access_token || (result as any)?.token;
       if (!token) {
         setApiError("Login succeeded but no access token was returned.");
         return;
@@ -65,6 +64,7 @@ export default function LoginForm() {
         setApiError((me as any)?.message || "Failed to fetch current user");
         return;
       }
+      console.log(me);
       setEndUser(me as any);
 
       // AppNavigator will switch to tabs when token+user are present

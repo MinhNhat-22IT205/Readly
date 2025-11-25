@@ -5,7 +5,7 @@ import SummaryDetailsScreen from "@app/screen/SummaryDetailsScreen";
 
 export type HomeStackParamList = {
   Home: undefined;
-  SummaryDetails: { bookId: string };
+  SummaryDetails: { summaryId: string };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();

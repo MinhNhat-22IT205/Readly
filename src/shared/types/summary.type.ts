@@ -27,7 +27,7 @@ type Summary = {
 
   // Meta
   published_date?: Date;
-  status: "writing" | "waiting_for_approval" | "approved" | "rejected";
+  status: "editing" | "waiting_for_approval" | "approved" | "rejected";
   read_count: number;
   audio_url?: string;
   avg_rating?: number;
