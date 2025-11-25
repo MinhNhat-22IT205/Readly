@@ -25,6 +25,24 @@ const login = async (
     });
     return result.data;
   } catch (error) {
+    const errorr = error as any;
+
+    // Make console truly useful
+    if (errorr.response) {
+      console.error("AXIOS ERROR: Server responded with non-2xx status");
+      console.error("Status:", errorr.response.status);
+      console.error("Headers:", errorr.response.headers);
+      console.error("Data:", errorr.response.data);
+    } else if (errorr.request) {
+      console.error("AXIOS ERROR: Request made but no response received");
+      console.error("Request:", errorr.request);
+    } else {
+      console.error("AXIOS ERROR: Something happened while setting up request");
+      console.error("Message:", errorr.message);
+    }
+
+    // Always log full stack for debugging
+    console.error("AXIOS STACK:", errorr.stack);
     return (
       (error as any).response?.data ?? {
         message: "Unknown error",

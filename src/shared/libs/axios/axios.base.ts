@@ -2,7 +2,7 @@ import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: "http://192.168.1.12:8000",
   timeout: 10000,
 });
 axiosInstance.interceptors.request.use((config) => {
