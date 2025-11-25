@@ -1,13 +1,13 @@
 import React from "react";
 import { ScrollView } from "react-native";
 import { SummaryCardItem } from "./SummaryCardItem";
-import { Summary } from "@shared-types/summary.type";
+import { Summary, SummaryPopulated } from "@shared-types/summary.type";
 
 export const SummaryList = ({
   summaries,
   onSummaryPress,
 }: {
-  summaries: Summary[];
+  summaries: SummaryPopulated[];
   onSummaryPress: (summary: Summary) => void;
 }) => (
   <ScrollView

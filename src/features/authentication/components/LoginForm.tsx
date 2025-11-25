@@ -16,6 +16,7 @@ import { login } from "../api/auth.api";
 import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import type { ServerError } from "@shared-types/server-error.type";
 import { isServerError } from "@shared-utils/is-server-error";
+import Toast from "react-native-toast-message";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -54,6 +55,10 @@ export default function LoginForm() {
       // TODO: Navigate to the desired screen after successful login.
     } catch (error) {
       setApiError("Something went wrong. Please try again.");
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong. Please try again." + error,
+      });
     } finally {
       setIsSubmitting(false);
     }

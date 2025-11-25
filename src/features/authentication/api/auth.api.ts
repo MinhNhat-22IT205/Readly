@@ -14,6 +14,18 @@ type LoginResponse = {
   user: EndUser;
 };
 
+// Helper function to normalize EndUser data from API
+// Converts is_active from string to boolean to prevent casting errors
+const normalizeEndUser = (user: any): EndUser => {
+  return {
+    ...user,
+    is_active:
+      typeof user.is_active === "boolean"
+        ? user.is_active
+        : user.is_active === "true" || user.is_active === true || user.is_active === 1,
+  };
+};
+
 const login = async (values: ztLoginInputs): Promise<LoginResponse> => {
   try {
     const result = await axiosInstance.post<LoginResponse>(
