@@ -133,7 +133,7 @@ export const WriterSummaryList = ({
       {/* Summaries List */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="px-4 py-4"
+        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16 }}
       >
         {filteredSummaries.map((summary) => (
           <WriterSummaryItem

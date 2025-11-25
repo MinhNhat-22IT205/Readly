@@ -64,7 +64,7 @@ export const SummaryCommentPopup = ({
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="px-5 pb-4"
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 16 }}
       >
         {publicComments.length === 0 ? (
           <View className="items-center justify-center py-12">

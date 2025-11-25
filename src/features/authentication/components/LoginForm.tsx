@@ -12,7 +12,7 @@ import { zLoginInputs, ztLoginInputs } from "../libs/login.zod";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@app/navigation/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
-import { login } from "../api/auth.api";
+import { login, getCurrentUser } from "../api/auth.api";
 import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import type { ServerError } from "@shared-types/server-error.type";
 import { isServerError } from "@shared-utils/is-server-error";
@@ -44,15 +44,30 @@ export default function LoginForm() {
     try {
       const result = await login(data);
 
-      if (isServerError(result)) {
-        setApiError(result.message ?? "Unable to complete sign in.");
+      if (isServerError(result as any)) {
+        setApiError((result as any).message ?? "Unable to complete sign in.");
         return;
       }
-      //TODO: handle the result
-      setEndUser(result.user);
-      setToken(result.access_token);
-      navigation.navigate("Home");
-      // TODO: Navigate to the desired screen after successful login.
+
+      const token =
+        (result as any)?.access_token || (result as any)?.token;
+      if (!token) {
+        setApiError("Login succeeded but no access token was returned.");
+        return;
+      }
+
+      // Save token to attach Authorization header automatically
+      setToken(token);
+
+      // Fetch current user profile
+      const me = await getCurrentUser();
+      if ((me as any)?.statusCode) {
+        setApiError((me as any)?.message || "Failed to fetch current user");
+        return;
+      }
+      setEndUser(me as any);
+
+      // AppNavigator will switch to tabs when token+user are present
     } catch (error) {
       setApiError("Something went wrong. Please try again.");
       Toast.show({

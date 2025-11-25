@@ -13,7 +13,7 @@ export const SummaryList = ({
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
-    contentContainerClassName="px-4"
+    contentContainerStyle={{ paddingHorizontal: 16 }}
   >
     {summaries.map((summary) => (
       <SummaryCardItem
