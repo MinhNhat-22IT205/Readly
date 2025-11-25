@@ -13,10 +13,14 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { WriterSummaryList } from "../../features/summary/components/writer/WriterSummaryList";
 import { CreateSummaryForm } from "../../features/summary/components/writer/CreateSummaryForm";
-import { Summary } from "@shared-types/summary.type";
+import { Summary, SummaryPopulated } from "@shared-types/summary.type";
 import { WriterStackParamList } from "../navigation/WriterStack";
 import useFetchWriterSummaryList from "@features/summary/hooks/useFetchWriterSummaryList";
-import { createSummary } from "@features/summary/api/summary.api";
+import {
+  createSummary,
+  deleteSummary,
+  updateSummaryStatus,
+} from "@features/summary/api/summary.api";
 
 type WriterSummaryListScreenNavigationProp =
   NativeStackNavigationProp<WriterStackParamList>;
@@ -72,6 +76,32 @@ export default function WriterSummaryListScreen() {
     }
   };
 
+  const getSummaryIdentifier = (summary: Summary) =>
+    summary.id ?? summary._id ?? "";
+
+  const handleChangeStatus = async (
+    summary: SummaryPopulated,
+    status: Summary["status"]
+  ) => {
+    const summaryId = getSummaryIdentifier(summary);
+    if (!summaryId) {
+      console.warn("Summary missing id:", summary);
+      throw new Error("Summary identifier missing");
+    }
+    await updateSummaryStatus(summaryId, status);
+    await mutateSummaries();
+  };
+
+  const handleDeleteSummary = async (summary: SummaryPopulated) => {
+    const summaryId = getSummaryIdentifier(summary);
+    if (!summaryId) {
+      console.warn("Summary missing id:", summary);
+      throw new Error("Summary identifier missing");
+    }
+    await deleteSummary(summaryId);
+    await mutateSummaries();
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-900">
       <StatusBar barStyle="light-content" />
@@ -88,6 +118,8 @@ export default function WriterSummaryListScreen() {
       <WriterSummaryList
         summaries={summaries ?? []}
         onSummaryPress={handleSummaryPress}
+        onChangeStatus={handleChangeStatus}
+        onDeleteSummary={handleDeleteSummary}
       />
 
       {/* Floating Action Button */}

@@ -1,4 +1,4 @@
-import { SummaryPopulated } from "@shared-types/summary.type";
+import { Summary, SummaryPopulated } from "@shared-types/summary.type";
 import { ContentSection } from "@shared-types/content_section.type";
 import { axiosInstance } from "@shared-libs/axios/axios.base";
 import { SUMMARY_ENDPOINT } from "./summary-endpoints.api";
@@ -49,6 +49,25 @@ export const createSummary = async (
     payload
   );
   return response.data;
+};
+
+export const updateSummaryStatus = async (
+  summaryId: number | string,
+  status: Summary["status"]
+): Promise<SummaryPopulated> => {
+  const response = await axiosInstance.patch<SummaryPopulated>(
+    `/summaries/${summaryId}/status`,
+    {
+      status,
+    }
+  );
+  return response.data;
+};
+
+export const deleteSummary = async (
+  summaryId: number | string
+): Promise<void> => {
+  await axiosInstance.delete(`/summaries/${summaryId}`);
 };
 
 // Content Section API functions
