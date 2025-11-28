@@ -31,9 +31,20 @@ export const useSummarySectionManager = (
         const result = await createSectionAPI(payload);
         onMutate?.();
         return result;
-      } catch (error) {
-        Alert.alert("Error", "Failed to create section");
-        console.error("Failed to create section:", error);
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data?.detail ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to create section";
+        console.error("Failed to create section:", {
+          error,
+          status: error?.response?.status,
+          data: error?.response?.data,
+          url: error?.config?.url,
+          baseURL: error?.config?.baseURL,
+        });
+        Alert.alert("Error", errorMessage);
         return null;
       }
     },

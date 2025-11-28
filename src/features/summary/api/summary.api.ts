@@ -34,6 +34,20 @@ export const fetchApprovedSummaries = async (): Promise<SummaryPopulated[]> => {
   return response.data;
 };
 
+export const fetchPendingSummaries = async (): Promise<SummaryPopulated[]> => {
+  const response = await axiosInstance.get<SummaryPopulated[]>(
+    "/summaries/?status_filter=waiting_for_approval"
+  );
+  return response.data;
+};
+
+export const fetchAllSummaries = async (): Promise<SummaryPopulated[]> => {
+  const response = await axiosInstance.get<SummaryPopulated[]>(
+    "/summaries/"
+  );
+  return response.data;
+};
+
 export interface CreateSummaryPayload {
   title: string;
   book_id: number;
@@ -44,11 +58,45 @@ export interface CreateSummaryPayload {
 export const createSummary = async (
   payload: CreateSummaryPayload
 ): Promise<SummaryPopulated> => {
-  const response = await axiosInstance.post<SummaryPopulated>(
-    SUMMARY_ENDPOINT,
-    payload
-  );
-  return response.data;
+  try {
+    console.log("🔵 Creating summary with payload:", payload);
+    const response = await axiosInstance.post<SummaryPopulated>(
+      SUMMARY_ENDPOINT,
+      payload
+    );
+    
+    // Log full response để debug
+    console.log("🟢 Create summary response status:", response.status);
+    console.log("🟢 Create summary response data:", JSON.stringify(response.data, null, 2));
+    console.log("🟢 Create summary response headers:", response.headers);
+    
+    // Kiểm tra nếu response.data có nested structure
+    const summaryData = response.data;
+    
+    if (!summaryData) {
+      throw new Error("Response data is empty");
+    }
+    
+    // Kiểm tra xem có id hoặc _id không
+    if (!summaryData.id && !summaryData._id) {
+      console.warn("⚠️ Summary response missing id/_id:", summaryData);
+    }
+    
+    return summaryData;
+  } catch (error: any) {
+    console.error("❌ Failed to create summary:", {
+      error,
+      message: error?.message,
+      status: error?.response?.status,
+      statusText: error?.response?.statusText,
+      data: error?.response?.data,
+      url: error?.config?.url,
+      baseURL: error?.config?.baseURL,
+      method: error?.config?.method,
+      payload: error?.config?.data,
+    });
+    throw error;
+  }
 };
 
 export const updateSummaryStatus = async (
