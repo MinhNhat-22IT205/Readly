@@ -58,7 +58,7 @@ const BookStoreScreen = () => {
   }, [books, search, selectedCategory]);
 
   const handleAddToCart = async (book: BookPopulated) => {
-    await addItem(book.id, 1);
+    await addItem(book.id, Number(book.price ?? 0), 1);
   };
 
   const handleOpenCart = () => {

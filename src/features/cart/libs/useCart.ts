@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import {
-  fetchCart,
+  fetchCartItems,
   addCartItem,
   updateCartItem,
   removeCartItem,
@@ -16,14 +16,14 @@ export const useCart = () => {
     isLoading,
     error,
     mutate,
-  } = useSWR<CartItem[]>(CART_CACHE_KEY, fetchCart);
+  } = useSWR<CartItem[]>(CART_CACHE_KEY, fetchCartItems);
 
   const refreshCart = async () => {
     await mutate();
   };
 
-  const addItem = async (bookId: number, quantity = 1) => {
-    await addCartItem(bookId, quantity);
+  const addItem = async (bookId: number, price: number, quantity = 1) => {
+    await addCartItem(bookId, quantity, price);
     await mutate();
   };
 

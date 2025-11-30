@@ -26,11 +26,9 @@ const CartScreen = () => {
 
   const subtotal = useMemo(() => {
     return items.reduce((sum, item) => {
-      const book = bookMap.get(item.book_id);
-      if (!book) return sum;
-      return sum + book.price * item.quantity;
+      return sum + Number(item.price ?? 0) * item.quantity;
     }, 0);
-  }, [bookMap, items]);
+  }, [items]);
 
   const handleCheckout = () => {
     navigation.navigate("Checkout");
