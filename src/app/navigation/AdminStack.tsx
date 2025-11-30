@@ -2,8 +2,10 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AdminSummaryListScreen from "@app/screen/AdminSummaryListScreen";
 import AdminSummaryDetailScreen from "@app/screen/AdminSummaryDetailScreen";
+import AdminDashboard from "@app/screen/AdminDashboard";
 
 export type AdminStackParamList = {
+  AdminDashboard: undefined;
   AdminSummaryList: undefined;
   AdminSummaryDetail: { summaryId: string };
 };
@@ -13,6 +15,7 @@ const Stack = createNativeStackNavigator<AdminStackParamList>();
 export default function AdminStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
       <Stack.Screen
         name="AdminSummaryList"
         component={AdminSummaryListScreen}
@@ -24,4 +27,3 @@ export default function AdminStack() {
     </Stack.Navigator>
   );
 }
-

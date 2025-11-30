@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SummarySection } from "@shared-types/summary.type";
+import { ContentSection } from "@shared-types/content_section.type";
 
 interface ContentDropdownProps {
-  section: SummarySection;
+  section: ContentSection;
   isOpen: boolean;
   onToggle: () => void;
 }
@@ -47,4 +47,3 @@ export const ContentDropdown = ({
     )}
   </View>
 );
-

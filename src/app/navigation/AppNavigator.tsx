@@ -36,9 +36,10 @@ export default function AppNavigator() {
       try {
         let savedToken: string | null = null;
         if (Platform.OS === "web") {
-          savedToken = (typeof window !== "undefined" && window.localStorage)
-            ? window.localStorage.getItem("auth_token")
-            : null;
+          savedToken =
+            typeof window !== "undefined" && window.localStorage
+              ? window.localStorage.getItem("auth_token")
+              : null;
         } else {
           savedToken = await AsyncStorage.getItem("auth_token");
         }
@@ -55,11 +56,13 @@ export default function AppNavigator() {
       try {
         if (Platform.OS === "web") {
           if (typeof window !== "undefined" && window.localStorage) {
-            if (access_token) window.localStorage.setItem("auth_token", access_token);
+            if (access_token)
+              window.localStorage.setItem("auth_token", access_token);
             else window.localStorage.removeItem("auth_token");
           }
         } else {
-          if (access_token) await AsyncStorage.setItem("auth_token", access_token);
+          if (access_token)
+            await AsyncStorage.setItem("auth_token", access_token);
           else await AsyncStorage.removeItem("auth_token");
         }
       } catch {}

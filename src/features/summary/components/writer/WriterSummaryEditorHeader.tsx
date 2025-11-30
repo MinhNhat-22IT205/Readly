@@ -26,4 +26,3 @@ export const WriterSummaryEditorHeader = ({
     </TouchableOpacity>
   </View>
 );
-

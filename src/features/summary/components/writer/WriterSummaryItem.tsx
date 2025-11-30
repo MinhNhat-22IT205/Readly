@@ -113,8 +113,8 @@ export const WriterSummaryItem = ({
             </Text>
           </View>
           <Text className="text-gray-500 text-xs">
-            {summary.published_date
-              ? new Date(summary.published_date).toLocaleDateString()
+            {summary.created_at
+              ? new Date(summary.created_at).toLocaleDateString()
               : "—"}
           </Text>
         </View>

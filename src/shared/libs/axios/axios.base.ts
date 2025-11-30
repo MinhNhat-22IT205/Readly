@@ -1,8 +1,9 @@
+import { BASE_API_URL } from "@shared-constants/base-api-path";
 import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "http://192.168.1.12:8000",
+  baseURL: BASE_API_URL,
   timeout: 10000,
 });
 axiosInstance.interceptors.request.use((config) => {

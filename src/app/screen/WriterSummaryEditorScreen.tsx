@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import { WriterStackParamList } from "../navigation/WriterStack";
 import { WriterSummarySectionEditor } from "../../features/summary/components/writer/WriterSummarySectionEditor";
 import { AddSectionButton } from "../../features/summary/components/writer/AddSectionButton";
-import { WriterSummaryEditorHeader } from "../../features/summary/components/writer/WriterSummaryEditorHeader";
 import { useSummaryEditor } from "../../features/summary/hooks/useSummaryEditor";
+import { useAdminComments } from "../../features/reader-comment/hooks/useAdminComments";
+import { AdminCommentModal } from "../../features/reader-comment/components/AdminCommentModal";
 
 type WriterSummaryEditorScreenRouteProp = RouteProp<
   WriterStackParamList,
@@ -28,6 +30,7 @@ export default function WriterSummaryEditorScreen() {
   const route = useRoute<WriterSummaryEditorScreenRouteProp>();
   const navigation = useNavigation<WriterSummaryEditorScreenNavigationProp>();
   const { summaryId } = route.params;
+  const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
 
   const {
     summary,
@@ -40,6 +43,10 @@ export default function WriterSummaryEditorScreen() {
     deleteSection,
     reorderSections,
   } = useSummaryEditor(summaryId);
+
+  const { comments, isLoading: isLoadingComments } = useAdminComments(
+    summaryId ? Number(summaryId) : null
+  );
 
   if (loading || !summary) {
     return (
@@ -56,10 +63,37 @@ export default function WriterSummaryEditorScreen() {
     <SafeAreaView className="flex-1 bg-gray-900">
       <StatusBar barStyle="light-content" />
 
-      <WriterSummaryEditorHeader
-        title={summary.title}
-        onClose={() => navigation.goBack()}
-      />
+      <View className="px-4 py-4 border-b border-gray-800 flex-row items-center justify-between">
+        <View className="flex-1">
+          <Text className="text-white text-xl font-bold" numberOfLines={1}>
+            {summary.title}
+          </Text>
+          <Text className="text-gray-400 text-sm mt-1">
+            Edit Content Sections
+          </Text>
+        </View>
+        <View className="flex-row items-center gap-2">
+          <TouchableOpacity
+            onPress={() => setIsCommentModalVisible(true)}
+            className="w-10 h-10 rounded-full bg-indigo-600 items-center justify-center"
+          >
+            <Ionicons name="chatbubbles" size={20} color="#fff" />
+            {comments.length > 0 && (
+              <View className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full items-center justify-center">
+                <Text className="text-white text-xs font-bold">
+                  {comments.length > 9 ? "9+" : comments.length}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
+          >
+            <Ionicons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <ScrollView
         className="flex-1"
@@ -151,6 +185,13 @@ export default function WriterSummaryEditorScreen() {
 
         <AddSectionButton onPress={addSection} />
       </ScrollView>
+
+      <AdminCommentModal
+        visible={isCommentModalVisible}
+        onClose={() => setIsCommentModalVisible(false)}
+        comments={comments}
+        isLoading={isLoadingComments}
+      />
     </SafeAreaView>
   );
 }

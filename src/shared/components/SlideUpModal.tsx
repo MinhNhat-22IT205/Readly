@@ -35,12 +35,16 @@ export const SlideUpModal = ({
       animationOut="slideOutDown"
       useNativeDriverForBackdrop
       hideModalContentWhileAnimating
+      propagateSwipe
     >
       <View
-        style={[styles.container, maxHeight ? { maxHeight } : undefined]}
+        style={[
+          styles.container,
+          maxHeight ? { height: maxHeight } : undefined,
+        ]}
         className="bg-gray-900 rounded-t-3xl"
       >
-        <SafeAreaView edges={["bottom"]} className="flex-1">
+        <SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
           {/* Handle Bar */}
           {showHandleBar && (
             <View className="items-center pt-3 pb-2">
@@ -68,6 +72,7 @@ export const SlideUpModal = ({
           )}
 
           {/* Content */}
+
           {children}
         </SafeAreaView>
       </View>

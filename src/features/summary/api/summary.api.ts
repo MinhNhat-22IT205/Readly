@@ -34,6 +34,11 @@ export const fetchApprovedSummaries = async (): Promise<SummaryPopulated[]> => {
   return response.data;
 };
 
+export const fetchAllSummaries = async (): Promise<SummaryPopulated[]> => {
+  const response = await axiosInstance.get<SummaryPopulated[]>("/summaries/");
+  return response.data;
+};
+
 export interface CreateSummaryPayload {
   title: string;
   book_id: number;

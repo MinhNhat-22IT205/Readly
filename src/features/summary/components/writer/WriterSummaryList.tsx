@@ -37,7 +37,7 @@ type SummaryAction =
   | {
       type: "status";
       label: string;
-      status: Summary["status"];
+      status_into: Summary["status"];
     }
   | {
       type: "delete";
@@ -51,14 +51,21 @@ const getActionsForSummary = (summary: SummaryPopulated): SummaryAction[] => {
     actions.push({
       type: "status",
       label: "Ready to review",
-      status: "waiting_for_approval",
+      status_into: "waiting_for_approval",
     });
   }
   if (summary.status === "waiting_for_approval") {
     actions.push({
       type: "status",
-      label: "Cancel submission",
-      status: "editing",
+      label: "Cancel review",
+      status_into: "editing",
+    });
+  }
+  if (summary.status === "rejected") {
+    actions.push({
+      type: "status",
+      label: "Ready to review",
+      status_into: "waiting_for_approval",
     });
   }
   if (summary.status !== "approved") {
@@ -117,7 +124,7 @@ export const WriterSummaryList = ({
     try {
       setIsProcessingAction(true);
       if (action.type === "status") {
-        await onChangeStatus(selectedSummary, action.status);
+        await onChangeStatus(selectedSummary, action.status_into);
       } else if (action.type === "delete") {
         await onDeleteSummary(selectedSummary);
       }

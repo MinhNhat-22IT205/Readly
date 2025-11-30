@@ -39,10 +39,7 @@ export default function WriterSummaryListScreen() {
       return;
     }
     // Navigate to editor screen for writing/pending summaries, details for approved
-    if (
-      summary.status === "editing" ||
-      summary.status === "waiting_for_approval"
-    ) {
+    if (summary.status === "editing" || summary.status === "rejected") {
       navigation.navigate("WriterSummaryEditor", { summaryId });
     } else {
       navigation.navigate("SummaryDetails", { summaryId });

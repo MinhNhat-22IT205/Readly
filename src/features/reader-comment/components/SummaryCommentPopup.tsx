@@ -14,12 +14,12 @@ const SummaryCommentItem = ({ comment }: { comment: Comment }) => (
   <View className="bg-gray-800 rounded-xl p-4 mb-3">
     <View className="flex-row items-start mb-3">
       <Image
-        source={{ uri: comment.endUser.avatar }}
+        source={{ uri: comment.user.profile_image }}
         className="w-12 h-12 rounded-full mr-3"
       />
       <View className="flex-1">
         <Text className="text-white font-semibold text-base">
-          {comment.endUser.username}
+          {comment.user.username}
         </Text>
         <Text className="text-gray-400 text-xs mt-1">
           {new Date(comment.createdAt).toLocaleDateString()}

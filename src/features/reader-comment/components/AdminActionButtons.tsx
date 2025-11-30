@@ -1,31 +1,27 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface AdminActionButtonsProps {
   summaryId: string;
-  currentStatus: "writing" | "waiting_for_approval" | "approved" | "rejected";
+  onApproveSummary: (summaryId: string) => {};
+  onRejectSUmmary: (summaryId: string) => {};
+  currentStatus: "editing" | "waiting_for_approval" | "approved" | "rejected";
   onStatusChange?: (newStatus: "approved" | "rejected") => void;
 }
-
-// Mock function to approve summary - in real app, use API
-const approveSummary = async (summaryId: string): Promise<void> => {
-  // Simulate API call
-  console.log("Approving summary:", summaryId);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-};
-
-// Mock function to reject summary - in real app, use API
-const rejectSummary = async (summaryId: string): Promise<void> => {
-  // Simulate API call
-  console.log("Rejecting summary:", summaryId);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-};
 
 export const AdminActionButtons = ({
   summaryId,
   currentStatus,
   onStatusChange,
+  onApproveSummary,
+  onRejectSUmmary,
 }: AdminActionButtonsProps) => {
   const [loading, setLoading] = useState<"approve" | "reject" | null>(null);
 
@@ -43,7 +39,7 @@ export const AdminActionButtons = ({
           onPress: async () => {
             try {
               setLoading("approve");
-              await approveSummary(summaryId);
+              await onApproveSummary(summaryId);
               onStatusChange?.("approved");
               Alert.alert("Success", "Summary approved successfully");
             } catch (error) {
@@ -72,7 +68,7 @@ export const AdminActionButtons = ({
           onPress: async () => {
             try {
               setLoading("reject");
-              await rejectSummary(summaryId);
+              await onRejectSUmmary(summaryId);
               onStatusChange?.("rejected");
               Alert.alert("Success", "Summary rejected");
             } catch (error) {
@@ -96,24 +92,24 @@ export const AdminActionButtons = ({
               currentStatus === "approved"
                 ? "checkmark-circle"
                 : currentStatus === "rejected"
-                ? "close-circle"
-                : "time-outline"
+                  ? "close-circle"
+                  : "time-outline"
             }
             size={20}
             color={
               currentStatus === "approved"
                 ? "#10b981"
                 : currentStatus === "rejected"
-                ? "#ef4444"
-                : "#9ca3af"
+                  ? "#ef4444"
+                  : "#9ca3af"
             }
           />
           <Text className="text-gray-300 ml-2 font-semibold capitalize">
             {currentStatus === "approved"
               ? "Approved"
               : currentStatus === "rejected"
-              ? "Rejected"
-              : "Writing"}
+                ? "Rejected"
+                : "Writing"}
           </Text>
         </View>
       </View>
@@ -164,4 +160,3 @@ export const AdminActionButtons = ({
     </View>
   );
 };
-
