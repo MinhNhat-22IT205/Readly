@@ -81,11 +81,51 @@ export const fetchOrders = async (): Promise<Order[]> => {
   return response.data;
 };
 
+export const fetchAdminOrders = async (): Promise<Order[]> => {
+  const response = await axiosInstance.get<Order[]>(`${ORDERS_ENDPOINT}admin/`);
+  return response.data;
+};
+
 export const fetchOrderById = async (
   orderId: string | number
 ): Promise<Order> => {
   const response = await axiosInstance.get<Order>(
     `${ORDERS_ENDPOINT}${orderId}`
+  );
+  return response.data;
+};
+
+export const fetchAdminOrderById = async (
+  orderId: string | number
+): Promise<Order> => {
+  const response = await axiosInstance.get<Order>(
+    `${ORDERS_ENDPOINT}admin/${orderId}`
+  );
+  return response.data;
+};
+
+export type UpdateAdminOrderPayload = Partial<
+  Pick<
+    Order,
+    | "payment_status"
+    | "shipment_status"
+    | "total_amount"
+    | "payment_method"
+    | "recipient_name"
+    | "address"
+    | "phone"
+    | "delivery_date"
+    | "shipping_method"
+  >
+>;
+
+export const updateAdminOrder = async (
+  orderId: number,
+  payload: UpdateAdminOrderPayload
+): Promise<Order> => {
+  const response = await axiosInstance.patch<Order>(
+    `${ORDERS_ENDPOINT}admin/${orderId}`,
+    payload
   );
   return response.data;
 };

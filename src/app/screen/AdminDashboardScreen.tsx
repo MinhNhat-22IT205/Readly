@@ -60,6 +60,10 @@ export default function AdminDashboardScreen() {
     navigation.navigate("CategoryManagement");
   };
 
+  const handleOrderManagement = () => {
+    navigation.navigate("AdminOrderList");
+  };
+
   const handlePendingSummaries = () => {
     navigation.navigate("AdminSummaryList");
   };
@@ -162,7 +166,13 @@ export default function AdminDashboardScreen() {
                   onPress={handleManageSummaries}
                 />
               </View>
-              <View className="flex-1 ml-2" />
+              <View className="flex-1 ml-2">
+                <ManagementButton
+                  icon="receipt-outline"
+                  label="Order Management"
+                  onPress={handleOrderManagement}
+                />
+              </View>
             </View>
           </View>
         </ScrollView>

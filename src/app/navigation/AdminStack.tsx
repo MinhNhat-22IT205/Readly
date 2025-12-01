@@ -9,6 +9,8 @@ import BookManagementScreen from "@app/screen/BookManagementScreen";
 import AuthorManagementScreen from "@app/screen/AuthorManagementScreen";
 import PublisherManagementScreen from "@app/screen/PublisherManagementScreen";
 import CategoryManagementScreen from "@app/screen/CategoryManagementScreen";
+import AdminOrderListScreen from "@app/screen/AdminOrderListScreen";
+import AdminOrderDetailScreen from "@app/screen/AdminOrderDetailScreen";
 
 export type AdminStackParamList = {
   AdminDashboard: undefined;
@@ -20,6 +22,8 @@ export type AdminStackParamList = {
   AuthorManagement: undefined;
   PublisherManagement: undefined;
   CategoryManagement: undefined;
+  AdminOrderList: undefined;
+  AdminOrderDetail: { orderId: string };
 };
 
 const Stack = createNativeStackNavigator<AdminStackParamList>();
@@ -62,6 +66,14 @@ export default function AdminStack() {
       <Stack.Screen
         name="CategoryManagement"
         component={CategoryManagementScreen}
+      />
+      <Stack.Screen
+        name="AdminOrderList"
+        component={AdminOrderListScreen}
+      />
+      <Stack.Screen
+        name="AdminOrderDetail"
+        component={AdminOrderDetailScreen}
       />
     </Stack.Navigator>
   );

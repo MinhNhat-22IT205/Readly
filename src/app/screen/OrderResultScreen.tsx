@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,11 +21,13 @@ const OrderResultScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute();
   const { orderId } = (route.params as RouteParams) || {};
-  const { refreshCart } = useCart();
+  const { clearCart } = useCart();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [pollCount, setPollCount] = useState(0);
+  const pollCountRef = useRef(0);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isPollingStoppedRef = useRef(false);
   const maxPolls = 10; // Poll tối đa 10 lần (khoảng 20 giây)
 
   useEffect(() => {
@@ -34,7 +36,16 @@ const OrderResultScreen = () => {
       return;
     }
 
+    // Reset khi orderId thay đổi
+    pollCountRef.current = 0;
+    isPollingStoppedRef.current = false;
+
     const pollOrderStatus = async () => {
+      // Kiểm tra xem đã dừng poll chưa
+      if (isPollingStoppedRef.current) {
+        return;
+      }
+
       try {
         const orderData = await fetchOrderById(orderId);
         setOrder(orderData);
@@ -42,27 +53,40 @@ const OrderResultScreen = () => {
         // Nếu đã có kết quả (không còn pending), dừng poll
         if (orderData.payment_status !== "pending") {
           setIsLoading(false);
-          await refreshCart(); // Clear cart sau khi thanh toán thành công
+          isPollingStoppedRef.current = true;
+          // Xóa giỏ hàng khi đơn hàng đã chuyển sang đang xử lý (không còn pending)
+          // Đảm bảo cart được xóa dù thanh toán thành công hay thất bại
+          await clearCart();
           return;
         }
 
         // Nếu vẫn pending và chưa hết số lần poll, tiếp tục
-        if (pollCount < maxPolls) {
-          setPollCount((prev) => prev + 1);
-          setTimeout(() => {
+        if (pollCountRef.current < maxPolls) {
+          pollCountRef.current += 1;
+          timeoutRef.current = setTimeout(() => {
             pollOrderStatus();
           }, 2000); // Poll mỗi 2 giây
         } else {
           setIsLoading(false);
+          isPollingStoppedRef.current = true;
         }
       } catch (error) {
         console.error("Error fetching order:", error);
         setIsLoading(false);
+        isPollingStoppedRef.current = true;
       }
     };
 
     pollOrderStatus();
-  }, [orderId, pollCount]);
+
+    // Cleanup: dừng poll khi unmount hoặc orderId thay đổi
+    return () => {
+      isPollingStoppedRef.current = true;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [orderId]);
 
   const getStatusInfo = () => {
     if (!order) return null;

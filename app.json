@@ -26,6 +26,12 @@
     },
     "web": {
       "bundler": "metro"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f01843bc-9781-4e26-be48-38e5a0359d99"
+      }
+    },
+    "owner": "viethacherpro1"
   }
 }
