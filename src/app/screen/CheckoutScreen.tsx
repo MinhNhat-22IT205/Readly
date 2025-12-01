@@ -31,7 +31,7 @@ const paymentOptions: CheckoutFormValues["paymentMethod"][] = [
 
 const CheckoutScreen = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { items, refreshCart, isEmpty } = useCart();
+  const { items, refreshCart, clearCart, isEmpty } = useCart();
   const { books } = useBookCatalog();
 
   const {
@@ -114,9 +114,11 @@ const CheckoutScreen = () => {
 
       console.log("✅ Order created:", { orderId: order.id, totalAmount: order.total_amount });
 
+      // Xóa giỏ hàng ngay sau khi đơn hàng được tạo thành công (đã chuyển sang đang xử lý)
+      await clearCart();
+
       // 2) Nếu là COD, không cần PayOS
       if (values.paymentMethod === "cod") {
-        await refreshCart();
         Alert.alert(
           "Đặt hàng thành công",
           "Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất.",

@@ -76,7 +76,7 @@ export default function HomeScreen() {
       {/* Quick Access */}
       <View className="px-4">
         <TouchableOpacity
-          className="bg-neutral-800 rounded-2xl p-4 flex-row items-center justify-between"
+          className="bg-neutral-800 rounded-2xl p-4 flex-row items-center justify-between mb-3"
           onPress={() => navigation.navigate("BookStore")}
         >
           <View>
@@ -91,6 +91,23 @@ export default function HomeScreen() {
           </View>
           <View className="w-12 h-12 rounded-full bg-emerald-500 items-center justify-center">
             <Ionicons name="cart-outline" size={22} color="#000" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className="bg-neutral-800 rounded-2xl p-4 flex-row items-center justify-between"
+          onPress={() => navigation.navigate("OrderManagement")}
+        >
+          <View>
+            <Text className="text-white font-semibold text-lg">
+              Đơn hàng của tôi
+            </Text>
+            <Text className="text-neutral-400 mt-1">
+              Xem và quản lý đơn hàng
+            </Text>
+          </View>
+          <View className="w-12 h-12 rounded-full bg-blue-500 items-center justify-center">
+            <Ionicons name="receipt-outline" size={22} color="#000" />
           </View>
         </TouchableOpacity>
       </View>

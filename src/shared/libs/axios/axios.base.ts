@@ -16,7 +16,8 @@ if (__DEV__) {
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  // Tăng timeout để tránh lỗi timeout sớm với các API xử lý lâu (như /orders/)
+  timeout: 30000,
 });
 
 axiosInstance.interceptors.request.use((config) => {
