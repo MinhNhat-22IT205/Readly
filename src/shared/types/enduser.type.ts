@@ -1,3 +1,5 @@
+import { UserRole } from "./user-role.type";
+
 type EndUser = {
   id: string;
   username: string;
@@ -11,4 +13,8 @@ type EndUser = {
 
 type EndUserMinimal = Pick<EndUser, "id" | "username" | "profile_image">;
 
-export { EndUser, EndUserMinimal };
+type EndUserPopulated = Omit<EndUser, "role"> & {
+  role: UserRole;
+};
+
+export { EndUser, EndUserMinimal, EndUserPopulated };

@@ -10,10 +10,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAdminComments } from "../hooks/useAdminComments";
-import { createComment, AdminCommentResponse } from "../api/comment.api";
+import { createComment } from "../api/comment.api";
+import { CommentPopulated } from "@shared-types/comment.type";
 
 interface AdminCommentPanelProps {
-  summaryId: string | number;
+  summaryId: string | null;
 }
 
 const CommentItem = ({
@@ -21,8 +22,8 @@ const CommentItem = ({
   onReply,
   level = 0,
 }: {
-  comment: AdminCommentResponse;
-  onReply: (commentId: number) => void;
+  comment: CommentPopulated;
+  onReply: (commentId: string) => void;
   level?: number;
 }) => {
   const userName = comment.user?.username || "Unknown";
@@ -92,11 +93,9 @@ const CommentItem = ({
 };
 
 export const AdminCommentPanel = ({ summaryId }: AdminCommentPanelProps) => {
-  const summaryIdNum =
-    typeof summaryId === "string" ? Number(summaryId) : summaryId;
-  const { comments, isLoading, mutate } = useAdminComments(summaryIdNum);
+  const { comments, isLoading, mutate } = useAdminComments(summaryId);
   const [newComment, setNewComment] = useState("");
-  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showInput, setShowInput] = useState(false);
 
@@ -106,12 +105,17 @@ export const AdminCommentPanel = ({ summaryId }: AdminCommentPanelProps) => {
       return;
     }
 
+    if (!summaryId) {
+      Alert.alert("Error", "Summary ID is required");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       await createComment({
-        summary_id: summaryIdNum,
+        summary_id: summaryId,
         content: newComment.trim(),
-        parent_comment_id: replyingTo,
+        parent_comment_id: replyingTo || undefined,
         access: "public",
       });
       setNewComment("");
@@ -128,7 +132,7 @@ export const AdminCommentPanel = ({ summaryId }: AdminCommentPanelProps) => {
     }
   };
 
-  const handleReply = (commentId: number) => {
+  const handleReply = (commentId: string) => {
     setReplyingTo(commentId);
     setShowInput(true);
   };
@@ -148,7 +152,7 @@ export const AdminCommentPanel = ({ summaryId }: AdminCommentPanelProps) => {
   const topLevelComments = comments.filter(
     (c) => !c.parent_comment_id && !c.parent_comment
   );
-  const getReplies = (parentId: number) =>
+  const getReplies = (parentId: string) =>
     comments.filter(
       (c) =>
         c.parent_comment_id === parentId || c.parent_comment?.id === parentId

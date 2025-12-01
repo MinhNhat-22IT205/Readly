@@ -1,14 +1,19 @@
-import { EndUserMinimal } from "./enduser.type";
+import { EndUserMinimal, EndUserPopulated } from "./enduser.type";
 import { Summary } from "./summary.type";
 
-type Comment = {
-  _id: string;
-  summary: Summary;
-  user: EndUserMinimal;
+type CommentAccess = "public" | "private";
+
+export type Comment = {
+  id: string;
+  summary_id: string;
+  user_id: string;
   content: string;
   parent_comment_id?: string;
-  access: "public" | "private";
-  createdAt: Date;
+  access: CommentAccess;
+  created_at: Date;
 };
 
-export { Comment };
+export type CommentPopulated = Comment & {
+  user: EndUserPopulated;
+  parent_comment?: CommentPopulated | null;
+};

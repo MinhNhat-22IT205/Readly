@@ -87,7 +87,9 @@ export const WriterSummaryItem = ({
             ) : null}
           </View>
           <Text className="text-gray-400 text-sm mb-2" numberOfLines={1}>
-            {summary.book?.author?.name ?? "Unknown author"}
+            {summary.book?.authors && summary.book.authors.length > 0
+              ? summary.book.authors.map((a) => a.name).join(", ")
+              : "Unknown author"}
           </Text>
           <View className="flex-row items-center gap-4 mb-2">
             <View className="flex-row items-center gap-1">

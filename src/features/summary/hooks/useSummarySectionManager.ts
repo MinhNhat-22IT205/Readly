@@ -31,9 +31,20 @@ export const useSummarySectionManager = (
         const result = await createSectionAPI(payload);
         onMutate?.();
         return result;
-      } catch (error) {
-        Alert.alert("Error", "Failed to create section");
-        console.error("Failed to create section:", error);
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data?.detail ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to create section";
+        console.error("Failed to create section:", {
+          error,
+          status: error?.response?.status,
+          data: error?.response?.data,
+          url: error?.config?.url,
+          baseURL: error?.config?.baseURL,
+        });
+        Alert.alert("Error", errorMessage);
         return null;
       }
     },
@@ -47,7 +58,7 @@ export const useSummarySectionManager = (
       updates: UpdateSectionPayload
     ): Promise<ContentSection | null> => {
       try {
-        setSaving((prev) => new Set(prev).add(index));
+        setSaving((prev) => new Set(prev).add(sectionId));
 
         const result = await updateSectionAPI(sectionId, updates);
         onMutate?.();
@@ -59,7 +70,7 @@ export const useSummarySectionManager = (
       } finally {
         setSaving((prev) => {
           const next = new Set(prev);
-          next.delete(index);
+          next.delete(sectionId);
           return next;
         });
       }
@@ -70,7 +81,7 @@ export const useSummarySectionManager = (
   const deleteSection = useCallback(
     async (sectionId: number, index: number): Promise<boolean> => {
       try {
-        setDeleting((prev) => new Set(prev).add(index));
+        setDeleting((prev) => new Set(prev).add(sectionId));
 
         await deleteSectionAPI(sectionId);
         onMutate?.();
@@ -82,7 +93,7 @@ export const useSummarySectionManager = (
       } finally {
         setDeleting((prev) => {
           const next = new Set(prev);
-          next.delete(index);
+          next.delete(sectionId);
           return next;
         });
       }

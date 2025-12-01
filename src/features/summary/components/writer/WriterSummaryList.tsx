@@ -23,6 +23,7 @@ interface WriterSummaryListProps {
     status: Summary["status"]
   ) => Promise<void> | void;
   onDeleteSummary: (summary: SummaryPopulated) => Promise<void> | void;
+  hideFilters?: boolean; // Optional prop để ẩn filter bar
 }
 
 const statusFilters: { label: string; value: StatusFilter }[] = [
@@ -83,6 +84,7 @@ export const WriterSummaryList = ({
   onSummaryPress,
   onChangeStatus,
   onDeleteSummary,
+  hideFilters = false,
 }: WriterSummaryListProps) => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedSummary, setSelectedSummary] =
@@ -90,15 +92,17 @@ export const WriterSummaryList = ({
   const [isProcessingAction, setIsProcessingAction] = useState(false);
 
   const filteredSummaries = useMemo(() => {
+    const summariesList = summaries ?? [];
     if (statusFilter === "all") {
-      return summaries;
+      return summariesList;
     }
-    return summaries.filter((summary) => summary.status === statusFilter);
+    return summariesList.filter((summary) => summary.status === statusFilter);
   }, [summaries, statusFilter]);
 
   const getStatusCount = (status: StatusFilter) => {
-    if (status === "all") return summaries.length;
-    return summaries.filter((s) => s.status === status).length;
+    const summariesList = summaries ?? [];
+    if (status === "all") return summariesList.length;
+    return summariesList.filter((s) => s.status === status).length;
   };
 
   const handleOpenActions = useCallback((summary: SummaryPopulated) => {
@@ -140,43 +144,45 @@ export const WriterSummaryList = ({
   if (filteredSummaries.length === 0) {
     return (
       <View className="flex-1">
-        {/* Status Filters */}
-        <View className="border-b border-gray-800">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              paddingHorizontal: 16,
-              paddingVertical: 12,
-            }}
-          >
-            {statusFilters.map((filter) => (
-              <TouchableOpacity
-                key={filter.value}
-                onPress={() => setStatusFilter(filter.value)}
-                style={{
-                  marginRight: 12,
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  borderRadius: 20,
-                  backgroundColor:
-                    statusFilter === filter.value ? "#4F46E5" : "#1F2937",
-                }}
-              >
-                <Text
+        {/* Status Filters - chỉ hiển thị nếu không hideFilters */}
+        {!hideFilters && (
+          <View className="border-b border-gray-800">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+              }}
+            >
+              {statusFilters.map((filter) => (
+                <TouchableOpacity
+                  key={filter.value}
+                  onPress={() => setStatusFilter(filter.value)}
                   style={{
-                    fontSize: 14,
-                    fontWeight: "600",
-                    color:
-                      statusFilter === filter.value ? "#FFFFFF" : "#9CA3AF",
+                    marginRight: 12,
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    borderRadius: 20,
+                    backgroundColor:
+                      statusFilter === filter.value ? "#4F46E5" : "#1F2937",
                   }}
                 >
-                  {filter.label} ({getStatusCount(filter.value)})
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "600",
+                      color:
+                        statusFilter === filter.value ? "#FFFFFF" : "#9CA3AF",
+                    }}
+                  >
+                    {filter.label} ({getStatusCount(filter.value)})
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Empty State */}
         <View className="items-center justify-center py-12 px-4">
@@ -196,39 +202,41 @@ export const WriterSummaryList = ({
 
   return (
     <View className="flex-1">
-      {/* Status Filters */}
-      <View className="border-b border-gray-800">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
-        >
-          {statusFilters.map((filter) => (
-            <TouchableOpacity
-              key={filter.value}
-              onPress={() => setStatusFilter(filter.value)}
-              style={{
-                marginRight: 12,
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                borderRadius: 20,
-                backgroundColor:
-                  statusFilter === filter.value ? "#4F46E5" : "#1F2937",
-              }}
-            >
-              <Text
+      {/* Status Filters - chỉ hiển thị nếu không hideFilters */}
+      {!hideFilters && (
+        <View className="border-b border-gray-800">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
+          >
+            {statusFilters.map((filter) => (
+              <TouchableOpacity
+                key={filter.value}
+                onPress={() => setStatusFilter(filter.value)}
                 style={{
-                  fontSize: 14,
-                  fontWeight: "600",
-                  color: statusFilter === filter.value ? "#FFFFFF" : "#9CA3AF",
+                  marginRight: 12,
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  borderRadius: 20,
+                  backgroundColor:
+                    statusFilter === filter.value ? "#4F46E5" : "#1F2937",
                 }}
               >
-                {filter.label} ({getStatusCount(filter.value)})
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                    color: statusFilter === filter.value ? "#FFFFFF" : "#9CA3AF",
+                  }}
+                >
+                  {filter.label} ({getStatusCount(filter.value)})
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       {/* Summaries List */}
       <ScrollView

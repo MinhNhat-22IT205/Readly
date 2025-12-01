@@ -14,8 +14,8 @@ import { WriterStackParamList } from "../navigation/WriterStack";
 import { WriterSummarySectionEditor } from "../../features/summary/components/writer/WriterSummarySectionEditor";
 import { AddSectionButton } from "../../features/summary/components/writer/AddSectionButton";
 import { useSummaryEditor } from "../../features/summary/hooks/useSummaryEditor";
-import { useAdminComments } from "../../features/reader-comment/hooks/useAdminComments";
-import { AdminCommentModal } from "../../features/reader-comment/components/AdminCommentModal";
+import { useAdminComments } from "../../features/comment/hooks/useAdminComments";
+import { WriterEditorCommentModal } from "../../features/comment/components/WriterEditorCommentModal";
 
 type WriterSummaryEditorScreenRouteProp = RouteProp<
   WriterStackParamList,
@@ -44,9 +44,11 @@ export default function WriterSummaryEditorScreen() {
     reorderSections,
   } = useSummaryEditor(summaryId);
 
-  const { comments, isLoading: isLoadingComments } = useAdminComments(
-    summaryId ? Number(summaryId) : null
-  );
+  const {
+    comments,
+    isLoading: isLoadingComments,
+    mutate: mutateComments,
+  } = useAdminComments(summaryId);
 
   if (loading || !summary) {
     return (
@@ -101,8 +103,8 @@ export default function WriterSummaryEditorScreen() {
         contentContainerStyle={{ padding: 16 }}
       >
         {sections.map((section, index) => {
-          const isSavingSection = saving.has(index);
-          const isDeletingSection = deleting.has(index);
+          const isSavingSection = saving.has(section.id);
+          const isDeletingSection = deleting.has(section.id);
           const canDelete = sections.length > 1 && !isDeletingSection;
           const canMoveUp = index > 0 && !isSavingSection && !isDeletingSection;
           const canMoveDown =
@@ -186,11 +188,13 @@ export default function WriterSummaryEditorScreen() {
         <AddSectionButton onPress={addSection} />
       </ScrollView>
 
-      <AdminCommentModal
+      <WriterEditorCommentModal
         visible={isCommentModalVisible}
         onClose={() => setIsCommentModalVisible(false)}
         comments={comments}
         isLoading={isLoadingComments}
+        summaryId={summaryId}
+        onCommentAdded={mutateComments}
       />
     </SafeAreaView>
   );

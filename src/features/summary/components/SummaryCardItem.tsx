@@ -49,7 +49,9 @@ export const SummaryCardItem = ({
         {summary.title}
       </Text>
       <Text className="text-xs text-zinc-500" numberOfLines={1}>
-        {summary.book.author.name}
+        {summary.book.authors && summary.book.authors.length > 0
+          ? summary.book.authors.map(a => a.name).join(", ")
+          : "Unknown author"}
       </Text>
       <View className="flex-row items-center gap-3 mt-1.5">
         {/* <View className="flex-row items-center gap-1">

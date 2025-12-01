@@ -46,18 +46,27 @@ export const CreateSummaryForm = ({
 
   const loadAvailableBooks = useCallback(async () => {
     setBooksLoading(true);
+    setBooksError(null);
     try {
+      console.log("Loading available books...");
       const data = await fetchBooksWithoutSummary();
-      setBooks(data);
+      console.log("Books loaded:", data?.length || 0);
+      setBooks(data || []);
       setBooksError(null);
 
       // Reset selection if the previously selected book is no longer available
       if (!data.some((book) => book.id === selectedBookId)) {
         setSelectedBookId(null);
       }
-    } catch (error) {
-      console.error("Failed to fetch books without summaries:", error);
+    } catch (error: any) {
+      console.error("Failed to fetch books without summaries:", {
+        error,
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status,
+      });
       setBooksError("Unable to load available books. Tap the field to retry.");
+      setBooks([]);
     } finally {
       setBooksLoading(false);
     }
@@ -65,13 +74,39 @@ export const CreateSummaryForm = ({
 
   useEffect(() => {
     if (visible) {
+      console.log("CreateSummaryForm opened, loading books...");
       loadAvailableBooks();
     } else {
+      console.log("CreateSummaryForm closed, resetting form...");
       resetForm();
     }
   }, [visible, loadAvailableBooks, resetForm]);
 
+  // Hiển thị alert khi không có books sau khi load xong
+  useEffect(() => {
+    if (visible && !booksLoading && books.length === 0 && !booksError) {
+      // Delay một chút để form đã render xong
+      const timer = setTimeout(() => {
+        Alert.alert(
+          "Không có sách mới",
+          "Tất cả sách hiện tại đã có summary. Mỗi sách chỉ có thể có một summary. Vui lòng thêm sách mới trước khi tạo summary.",
+          [{ text: "Đã hiểu", style: "default" }]
+        );
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [visible, booksLoading, books.length, booksError]);
+
   const handleSubmit = async () => {
+    // Kiểm tra nếu không có books available
+    if (books.length === 0 && !booksLoading) {
+      Alert.alert(
+        "No Books Available",
+        "All books currently have summaries. Each book can only have one summary. Please add a new book first."
+      );
+      return;
+    }
+
     if (!title.trim()) {
       Alert.alert("Missing title", "Please enter a summary title.");
       return;
@@ -124,6 +159,22 @@ export const CreateSummaryForm = ({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 20 }}
       >
+        {/* Empty State - Hiển thị ngay khi không có books */}
+        {!booksLoading && books.length === 0 && !booksError && (
+          <View className="mb-6 p-5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl items-center">
+            <Ionicons name="information-circle" size={32} color="#F59E0B" />
+            <Text className="text-yellow-400 text-base font-semibold mt-3 text-center">
+              Không có sách mới
+            </Text>
+            <Text className="text-yellow-300/80 text-sm text-center mt-2 px-2">
+              Tất cả sách hiện tại đã có summary. Mỗi sách chỉ có thể có một summary.
+            </Text>
+            <Text className="text-yellow-300/60 text-xs text-center mt-2 px-2">
+              Vui lòng thêm sách mới trước khi tạo summary.
+            </Text>
+          </View>
+        )}
+
         {/* Book Selector */}
         <View className="mb-4">
           <Text className="text-white font-semibold text-sm mb-2">Book *</Text>
@@ -139,12 +190,18 @@ export const CreateSummaryForm = ({
             activeOpacity={0.8}
             disabled={booksLoading}
           >
-            <Text className="text-white text-base flex-1 mr-3">
+            <Text className={`text-base flex-1 mr-3 ${
+              books.length === 0 && !booksLoading && !selectedBook
+                ? "text-gray-500"
+                : "text-white"
+            }`}>
               {booksLoading
                 ? "Loading books..."
-                : selectedBook
-                  ? selectedBook.title
-                  : "Select a book"}
+                : books.length === 0 && !booksLoading
+                  ? "No books available"
+                  : selectedBook
+                    ? selectedBook.title
+                    : "Select a book"}
             </Text>
             <Ionicons
               name={bookDropdownOpen ? "chevron-up" : "chevron-down"}
@@ -159,10 +216,16 @@ export const CreateSummaryForm = ({
                   <ActivityIndicator color="#A5B4FC" />
                 </View>
               ) : books.length === 0 ? (
-                <View className="p-4">
-                  <Text className="text-gray-400 text-sm text-center">
-                    All books currently have summaries. Please add a new book or
-                    check back later.
+                <View className="p-6 items-center justify-center">
+                  <Ionicons name="book-outline" size={48} color="#6B7280" />
+                  <Text className="text-gray-300 text-base font-semibold mt-4 text-center">
+                    No Books Available
+                  </Text>
+                  <Text className="text-gray-400 text-sm text-center mt-2 px-2">
+                    All books currently have summaries. Each book can only have one summary.
+                  </Text>
+                  <Text className="text-gray-500 text-xs text-center mt-2 px-2">
+                    Please add a new book first to create a summary.
                   </Text>
                 </View>
               ) : (
@@ -214,16 +277,30 @@ export const CreateSummaryForm = ({
         {/* Submit Button */}
         <TouchableOpacity
           onPress={handleSubmit}
-          className="bg-indigo-600 rounded-xl p-4 flex-row items-center justify-center"
-          disabled={submitting}
+          className={`rounded-xl p-4 flex-row items-center justify-center ${
+            books.length === 0 && !booksLoading
+              ? "bg-gray-700"
+              : "bg-indigo-600"
+          }`}
+          disabled={submitting || (books.length === 0 && !booksLoading)}
           activeOpacity={0.8}
         >
           {submitting ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
             <>
-              <Ionicons name="checkmark" size={20} color="#FFFFFF" />
-              <Text className="text-white font-semibold text-base ml-2">
+              <Ionicons
+                name="checkmark"
+                size={20}
+                color={books.length === 0 && !booksLoading ? "#9CA3AF" : "#FFFFFF"}
+              />
+              <Text
+                className={`font-semibold text-base ml-2 ${
+                  books.length === 0 && !booksLoading
+                    ? "text-gray-400"
+                    : "text-white"
+                }`}
+              >
                 Create Summary
               </Text>
             </>

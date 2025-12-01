@@ -45,7 +45,10 @@ export const ReadingHistoryItem = ({
         {readingHistory.summary.title}
       </Text>
       <Text className="text-xs text-zinc-500" numberOfLines={1}>
-        {readingHistory.summary.book.author?.name || "Unknown Author"}
+        {readingHistory.summary.book.authors &&
+        readingHistory.summary.book.authors.length > 0
+          ? readingHistory.summary.book.authors.map((a) => a.name).join(", ")
+          : "Unknown Author"}
       </Text>
       <View className="flex-row items-center gap-3 mt-1.5">
         <View className="flex-row items-center gap-1">

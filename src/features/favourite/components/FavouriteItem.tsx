@@ -33,7 +33,10 @@ export const FavouriteItem = ({
         {favourite.summary.title}
       </Text>
       <Text className="text-xs text-zinc-500" numberOfLines={1}>
-        {favourite.summary.book.author?.name || "Unknown Author"}
+        {favourite.summary.book.authors &&
+        favourite.summary.book.authors.length > 0
+          ? favourite.summary.book.authors.map((a) => a.name).join(", ")
+          : "Unknown Author"}
       </Text>
       <View className="flex-row items-center gap-3 mt-1.5">
         <View className="flex-row items-center gap-1">

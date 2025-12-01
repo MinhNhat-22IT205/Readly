@@ -1,7 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ContentSection } from "@shared-types/content_section.type";
+import { RichTextEditor } from "@shared-components/RichTextEditor";
 
 interface WriterSummarySectionEditorProps {
   section: ContentSection;
@@ -32,6 +40,8 @@ export const WriterSummarySectionEditor = ({
 }: WriterSummarySectionEditorProps) => {
   const [titleValue, setTitleValue] = useState(section.title ?? "");
   const [contentValue, setContentValue] = useState(section.content ?? "");
+  const contentUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const titleUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setTitleValue(section.title ?? "");
@@ -41,7 +51,56 @@ export const WriterSummarySectionEditor = ({
     setContentValue(section.content ?? "");
   }, [section.content]);
 
+  // Auto-save content every 3 seconds after last change
+  useEffect(() => {
+    // Clear existing timeout
+    if (contentUpdateTimeoutRef.current) {
+      clearTimeout(contentUpdateTimeoutRef.current);
+    }
+
+    // Only set timeout if content has actually changed
+    if (contentValue !== (section.content ?? "")) {
+      contentUpdateTimeoutRef.current = setTimeout(() => {
+        onUpdate(index, "content", contentValue);
+      }, 3000);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (contentUpdateTimeoutRef.current) {
+        clearTimeout(contentUpdateTimeoutRef.current);
+      }
+    };
+  }, [contentValue, section.content, index, onUpdate]);
+
+  // Auto-save title every 3 seconds after last change
+  useEffect(() => {
+    // Clear existing timeout
+    if (titleUpdateTimeoutRef.current) {
+      clearTimeout(titleUpdateTimeoutRef.current);
+    }
+
+    // Only set timeout if title has actually changed
+    if (titleValue !== (section.title ?? "")) {
+      titleUpdateTimeoutRef.current = setTimeout(() => {
+        onUpdate(index, "title", titleValue);
+      }, 3000);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (titleUpdateTimeoutRef.current) {
+        clearTimeout(titleUpdateTimeoutRef.current);
+      }
+    };
+  }, [titleValue, section.title, index, onUpdate]);
+
   const handleTitleBlur = () => {
+    // Clear any pending timeout and save immediately
+    if (titleUpdateTimeoutRef.current) {
+      clearTimeout(titleUpdateTimeoutRef.current);
+      titleUpdateTimeoutRef.current = null;
+    }
     if (titleValue === (section.title ?? "")) {
       return;
     }
@@ -49,6 +108,11 @@ export const WriterSummarySectionEditor = ({
   };
 
   const handleContentBlur = () => {
+    // Clear any pending timeout and save immediately
+    if (contentUpdateTimeoutRef.current) {
+      clearTimeout(contentUpdateTimeoutRef.current);
+      contentUpdateTimeoutRef.current = null;
+    }
     if (contentValue === (section.content ?? "")) {
       return;
     }
@@ -85,9 +149,7 @@ export const WriterSummarySectionEditor = ({
           </Text>
         </View>
         <View className="flex-row items-center gap-2">
-          {isSaving && (
-            <Ionicons name="sync" size={16} color="#4F46E5" />
-          )}
+          {isSaving && <Ionicons name="sync" size={16} color="#4F46E5" />}
           {isDeleting && (
             <Ionicons name="hourglass-outline" size={16} color="#9CA3AF" />
           )}
@@ -136,23 +198,35 @@ export const WriterSummarySectionEditor = ({
       />
 
       {/* Section Content Input */}
-      <TextInput
-        placeholder="Section Content"
-        placeholderTextColor="#6B7280"
-        value={contentValue}
-        onChangeText={setContentValue}
-        onBlur={handleContentBlur}
-        multiline
-        numberOfLines={6}
-        textAlignVertical="top"
-        className="bg-gray-700 text-white rounded-lg px-4 py-3 text-base"
-        style={{
-          color: "#FFFFFF",
-          minHeight: 120,
-          maxHeight: 200,
-        }}
-      />
+      <View className="relative">
+        {isSaving && (
+          <View className="absolute top-2 right-2 z-10 bg-gray-800/80 rounded-full p-2">
+            <ActivityIndicator size="small" color="#4F46E5" />
+          </View>
+        )}
+        <RichTextEditor
+          initialContent={contentValue}
+          placeholder="Nhập nội dung section..."
+          onContentChange={(html) => {
+            setContentValue(html);
+          }}
+          onBlur={handleContentBlur}
+          disabled={isSaving}
+          minHeight={150}
+          initialHeight={200}
+          containerStyle={{
+            backgroundColor: "#374151",
+            borderRadius: 8,
+          }}
+          editorStyle={{
+            backgroundColor: "#374151",
+            color: "#FFFFFF",
+          }}
+          toolbarStyle={{
+            backgroundColor: "#1F2937",
+          }}
+        />
+      </View>
     </View>
   );
 };
-

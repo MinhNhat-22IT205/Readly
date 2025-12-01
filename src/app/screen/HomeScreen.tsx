@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -13,12 +13,14 @@ import { SectionHeader } from "../../features/summary/components/SectionHeader";
 import { Comment } from "@shared-types/comment.type";
 import { Summary, SummaryPopulated } from "@shared-types/summary.type";
 import { HomeStackParamList } from "../navigation/HomeStack";
-import { PublicCommentList } from "@features/reader-comment/components/PublicCommentList";
+import { PublicCommentList } from "@features/comment/components/PublicCommentList";
 import useFetchApprovedSummaryList from "@features/summary/hooks/useFetchApprovedSummaryList";
 import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useCart } from "@features/cart/libs/useCart";
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   HomeStackParamList,
@@ -31,6 +33,7 @@ export default function HomeScreen() {
   const { summaries, isLoading, isError, mutate } =
     useFetchApprovedSummaryList();
   const clearAuth = useAuthStore((s) => s.clearAuth);
+  const { totalItems } = useCart();
 
   const handleSummaryPress = (summary: SummaryPopulated) => {
     console.log(summary.id);
@@ -67,6 +70,28 @@ export default function HomeScreen() {
           className="px-3 py-2 bg-red-500 rounded-md"
         >
           <Text className="text-white font-semibold">Logout</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Quick Access */}
+      <View className="px-4">
+        <TouchableOpacity
+          className="bg-neutral-800 rounded-2xl p-4 flex-row items-center justify-between"
+          onPress={() => navigation.navigate("BookStore")}
+        >
+          <View>
+            <Text className="text-white font-semibold text-lg">
+              Khám phá cửa hàng sách
+            </Text>
+            <Text className="text-neutral-400 mt-1">
+              {totalItems > 0
+                ? `Bạn có ${totalItems} sản phẩm trong giỏ`
+                : "Ưu đãi hấp dẫn đang chờ bạn"}
+            </Text>
+          </View>
+          <View className="w-12 h-12 rounded-full bg-emerald-500 items-center justify-center">
+            <Ionicons name="cart-outline" size={22} color="#000" />
+          </View>
         </TouchableOpacity>
       </View>
 

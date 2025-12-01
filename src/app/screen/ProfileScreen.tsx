@@ -106,9 +106,10 @@ export default function ProfileScreen() {
       setSelectedImageUri(result.assets[0].uri);
     }
   };
-
   const avatarUri =
-    selectedImageUri || BASE_API_URL + endUser.profile_image || DUMMY_AVATAR;
+    selectedImageUri ||
+    process.env.EXPO_PUBLIC_API_BASE_URL + endUser.profile_image ||
+    DUMMY_AVATAR;
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-900">

@@ -4,8 +4,6 @@ import { Publisher } from "./publisher.type";
 
 type Book = {
   id: number;
-  category_id: number | null;
-  author_id: number | null;
   publisher_id: number | null;
   title: string;
   publish_date: string | null;
@@ -14,8 +12,8 @@ type Book = {
   stock_quantity: number;
 };
 type BookPopulated = Book & {
-  category?: Category | null;
-  author?: Author | null;
+  categories?: Category[];
+  authors?: Author[];
   publisher?: Publisher | null;
 };
 

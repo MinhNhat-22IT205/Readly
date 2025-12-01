@@ -11,13 +11,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import { mutate as mutateSWR } from "swr";
 import { AdminStackParamList } from "../navigation/AdminStack";
 import { ContentDropdown } from "../../features/summary/components/ContentDropdown";
 import useFetchSummary from "@features/summary/hooks/useFetchSummary";
 import useFetchSummarySectionList from "@features/summary/hooks/useFetchSummarySectionList";
 import { SlideUpModal } from "../../shared/components/SlideUpModal";
-import { AdminActionButtons } from "../../features/reader-comment/components/AdminActionButtons";
-import { AdminCommentPanel } from "../../features/reader-comment/components/AdminCommentPanel";
+import { AdminActionButtons } from "../../features/comment/components/AdminActionButtons";
+import { AdminCommentPanel } from "../../features/comment/components/AdminCommentPanel";
 import { updateSummaryStatus } from "@features/summary/api/summary.api";
 
 type AdminSummaryDetailScreenRouteProp = RouteProp<
@@ -58,6 +59,8 @@ export default function AdminSummaryDetailScreen() {
   const handleStatusChange = (newStatus: "approved" | "rejected") => {
     if (summary) {
       mutate({ ...summary, status: newStatus }, false);
+      // Invalidate the all-summaries cache to refresh the list
+      mutateSWR("all-summaries");
       setTimeout(() => {
         navigation.goBack();
       }, 1500);
@@ -65,9 +68,13 @@ export default function AdminSummaryDetailScreen() {
   };
   const handleApproveSummary = async (summaryId: string) => {
     await updateSummaryStatus(summaryId, "approved");
+    // Invalidate the all-summaries cache to refresh the list
+    mutateSWR("all-summaries");
   };
   const handleRejectSummary = async (summaryId: string) => {
     await updateSummaryStatus(summaryId, "rejected");
+    // Invalidate the all-summaries cache to refresh the list
+    mutateSWR("all-summaries");
   };
 
   if (isSummaryLoading || isSectionsLoading) {
@@ -95,10 +102,11 @@ export default function AdminSummaryDetailScreen() {
   const book = summary.book;
   const bookCoverUrl = summary.book_cover_path || book?.cover_image || "";
   const bookTitle = summary.title || book?.title || "";
-  const bookAuthor =
+  const bookAuthors =
     summary.book_author ||
-    book?.author?.name ||
-    (book?.author as any)?.name ||
+    (book?.authors && book.authors.length > 0
+      ? book.authors.map((a) => a.name).join(", ")
+      : "") ||
     "";
   const user = summary.user;
 
@@ -157,7 +165,7 @@ export default function AdminSummaryDetailScreen() {
         <View className="px-4 mt-6 flex-row items-start justify-between">
           <View className="flex-1 mr-3">
             <Text className="text-white text-2xl font-bold">{bookTitle}</Text>
-            <Text className="text-gray-400 mt-2">{bookAuthor}</Text>
+            <Text className="text-gray-400 mt-2">{bookAuthors}</Text>
             <Text className="text-gray-500 text-sm mt-1">{user?.username}</Text>
           </View>
           <TouchableOpacity
@@ -200,23 +208,26 @@ export default function AdminSummaryDetailScreen() {
         </View>
 
         {/* Author Section */}
-        <View className="mx-4 mt-4 bg-gray-800 rounded-lg p-4 flex-row">
-          <Image
-            source={{
-              uri: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200",
-            }}
-            className="w-14 h-14 rounded-full"
-          />
-          <View className="ml-4 flex-1">
-            <Text className="text-white font-bold text-base">
-              {summary.user.username}
-            </Text>
-            <Text className="text-gray-500 text-sm">{summary.book_author}</Text>
-            <Text className="text-gray-400 text-sm mt-2">
-              Writer who creates engaging summaries
-            </Text>
+        {book?.authors && book.authors.length > 0 && (
+          <View className="mx-4 mt-4 bg-gray-800 rounded-lg p-4">
+            <Text className="text-white font-bold text-base mb-2">Tác giả</Text>
+            {book.authors.map((author, index) => (
+              <View key={author.id || index} className="mb-3 last:mb-0">
+                <Text className="text-white font-semibold text-sm">
+                  {author.name}
+                </Text>
+                {author.biography && (
+                  <Text
+                    className="text-gray-400 text-xs mt-1"
+                    numberOfLines={3}
+                  >
+                    {author.biography}
+                  </Text>
+                )}
+              </View>
+            ))}
           </View>
-        </View>
+        )}
 
         {/* Bottom Spacing */}
         <View className="h-24" />

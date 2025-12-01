@@ -31,7 +31,7 @@ export default function AppTabs() {
           if (route.name === "Profile") {
             // Always show an avatar image (real or dummy) for Profile tab
             const avatarUri = endUser?.profile_image
-              ? endUser.profile_image
+              ? process.env.EXPO_PUBLIC_API_BASE_URL + endUser.profile_image
               : DUMMY_AVATAR;
             return (
               <Image

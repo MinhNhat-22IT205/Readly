@@ -90,7 +90,9 @@ export const AdminSummaryList = ({
               </View>
 
               <Text className="text-gray-300 text-xs" numberOfLines={1}>
-                {summary.book?.author?.name ?? "Unknown author"}
+                {summary.book?.authors && summary.book.authors.length > 0
+                  ? summary.book.authors.map((a) => a.name).join(", ")
+                  : "Unknown author"}
               </Text>
 
               <View className="mt-1 flex-row">
@@ -103,9 +105,14 @@ export const AdminSummaryList = ({
               </View>
               <View className="mt-0.5 flex-row">
                 <Text className="text-gray-400 text-[11px]" numberOfLines={1}>
-                  Category:{" "}
+                  Categories:{" "}
                   <Text className="text-gray-300">
-                    {summary.book?.category?.category_name ?? "Unknown"}
+                    {summary.book?.categories &&
+                    summary.book.categories.length > 0
+                      ? summary.book.categories
+                          .map((cat) => cat.category_name)
+                          .join(", ")
+                      : "Unknown"}
                   </Text>
                 </Text>
               </View>

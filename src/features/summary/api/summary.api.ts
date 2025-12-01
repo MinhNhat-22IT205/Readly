@@ -34,6 +34,15 @@ export const fetchApprovedSummaries = async (): Promise<SummaryPopulated[]> => {
   return response.data;
 };
 
+export const fetchRecommendedSummaries = async (): Promise<
+  SummaryPopulated[]
+> => {
+  const response = await axiosInstance.get<SummaryPopulated[]>(
+    "/summaries/recommend/me"
+  );
+  return response.data;
+};
+
 export const fetchAllSummaries = async (): Promise<SummaryPopulated[]> => {
   const response = await axiosInstance.get<SummaryPopulated[]>("/summaries/");
   return response.data;
