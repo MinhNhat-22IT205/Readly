@@ -10,7 +10,10 @@ import BookManagementScreen from "@app/screen/BookManagementScreen";
 import AuthorManagementScreen from "@app/screen/AuthorManagementScreen";
 import AuthorDetailScreen from "@app/screen/AuthorDetailScreen";
 import PublisherManagementScreen from "@app/screen/PublisherManagementScreen";
+import PublisherDetailScreen from "@app/screen/PublisherDetailScreen";
 import CategoryManagementScreen from "@app/screen/CategoryManagementScreen";
+import CategoryDetailScreen from "@app/screen/CategoryDetailScreen";
+import BookDetailScreen from "@app/screen/BookDetailScreen";
 import AdminOrderListScreen from "@app/screen/AdminOrderListScreen";
 import AdminOrderDetailScreen from "@app/screen/AdminOrderDetailScreen";
 
@@ -22,10 +25,13 @@ export type AdminStackParamList = {
   UserManagement: undefined;
   UserDetail: { userId: string };
   BookManagement: undefined;
+  BookDetail: { bookId: string };
   AuthorManagement: undefined;
   AuthorDetail: { authorId: string };
   PublisherManagement: undefined;
+  PublisherDetail: { publisherId: string };
   CategoryManagement: undefined;
+  CategoryDetail: { categoryId: string };
   AdminOrderList: undefined;
   AdminOrderDetail: { orderId: string };
 };
@@ -51,6 +57,7 @@ export default function AdminStack() {
       <Stack.Screen name="UserManagement" component={UserManagementScreen} />
       <Stack.Screen name="UserDetail" component={UserDetailScreen} />
       <Stack.Screen name="BookManagement" component={BookManagementScreen} />
+      <Stack.Screen name="BookDetail" component={BookDetailScreen} />
       <Stack.Screen
         name="AuthorManagement"
         component={AuthorManagementScreen}
@@ -60,10 +67,12 @@ export default function AdminStack() {
         name="PublisherManagement"
         component={PublisherManagementScreen}
       />
+      <Stack.Screen name="PublisherDetail" component={PublisherDetailScreen} />
       <Stack.Screen
         name="CategoryManagement"
         component={CategoryManagementScreen}
       />
+      <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
       <Stack.Screen
         name="AdminOrderList"
         component={AdminOrderListScreen}
