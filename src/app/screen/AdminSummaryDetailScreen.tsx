@@ -18,6 +18,7 @@ import useFetchSummary from "@features/summary/hooks/useFetchSummary";
 import useFetchSummarySectionList from "@features/summary/hooks/useFetchSummarySectionList";
 import { SlideUpModal } from "../../shared/components/SlideUpModal";
 import { AdminActionButtons } from "../../features/comment/components/AdminActionButtons";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 import { AdminCommentPanel } from "../../features/comment/components/AdminCommentPanel";
 import { updateSummaryStatus } from "@features/summary/api/summary.api";
 
@@ -100,7 +101,11 @@ export default function AdminSummaryDetailScreen() {
   }
 
   const book = summary.book;
-  const bookCoverUrl = summary.book_cover_path || book?.cover_image || "";
+  const bookCoverUrlRaw =
+    summary.book_cover_path ||
+    book?.cover_image ||
+    "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop";
+  const bookCoverUrl = validateImageUri(bookCoverUrlRaw);
   const bookTitle = summary.title || book?.title || "";
   const bookAuthors =
     summary.book_author ||

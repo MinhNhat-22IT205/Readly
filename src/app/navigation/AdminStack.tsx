@@ -5,8 +5,10 @@ import AdminSummaryListScreen from "@app/screen/AdminSummaryListScreen";
 import AdminSummaryDetailScreen from "@app/screen/AdminSummaryDetailScreen";
 import AdminManageSummariesScreen from "@app/screen/AdminManageSummariesScreen";
 import UserManagementScreen from "@app/screen/UserManagementScreen";
+import UserDetailScreen from "@app/screen/UserDetailScreen";
 import BookManagementScreen from "@app/screen/BookManagementScreen";
 import AuthorManagementScreen from "@app/screen/AuthorManagementScreen";
+import AuthorDetailScreen from "@app/screen/AuthorDetailScreen";
 import PublisherManagementScreen from "@app/screen/PublisherManagementScreen";
 import CategoryManagementScreen from "@app/screen/CategoryManagementScreen";
 import AdminOrderListScreen from "@app/screen/AdminOrderListScreen";
@@ -18,8 +20,10 @@ export type AdminStackParamList = {
   AdminSummaryDetail: { summaryId: string };
   AdminManageSummaries: undefined;
   UserManagement: undefined;
+  UserDetail: { userId: string };
   BookManagement: undefined;
   AuthorManagement: undefined;
+  AuthorDetail: { authorId: string };
   PublisherManagement: undefined;
   CategoryManagement: undefined;
   AdminOrderList: undefined;
@@ -45,11 +49,13 @@ export default function AdminStack() {
         component={AdminManageSummariesScreen}
       />
       <Stack.Screen name="UserManagement" component={UserManagementScreen} />
+      <Stack.Screen name="UserDetail" component={UserDetailScreen} />
       <Stack.Screen name="BookManagement" component={BookManagementScreen} />
       <Stack.Screen
         name="AuthorManagement"
         component={AuthorManagementScreen}
       />
+      <Stack.Screen name="AuthorDetail" component={AuthorDetailScreen} />
       <Stack.Screen
         name="PublisherManagement"
         component={PublisherManagementScreen}

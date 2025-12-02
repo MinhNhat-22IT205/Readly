@@ -1,8 +1,10 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Platform } from "react-native";
 import Modal from "react-native-modal";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface SlideUpModalProps {
   visible: boolean;
@@ -23,6 +25,19 @@ export const SlideUpModal = ({
   showCloseButton = true,
   maxHeight,
 }: SlideUpModalProps) => {
+  // Calculate height: if maxHeight < 1, treat as ratio; otherwise treat as absolute pixels
+  const getHeight = () => {
+    if (!maxHeight) return SCREEN_HEIGHT * 0.9;
+    if (maxHeight < 1) {
+      // Ratio (e.g., 0.9 = 90% of screen)
+      return SCREEN_HEIGHT * maxHeight;
+    }
+    // Absolute pixels (e.g., 600)
+    return Math.min(maxHeight, SCREEN_HEIGHT * 0.95);
+  };
+
+  const modalHeight = getHeight();
+
   return (
     <Modal
       isVisible={visible}
@@ -34,17 +49,23 @@ export const SlideUpModal = ({
       animationIn="slideInUp"
       animationOut="slideOutDown"
       useNativeDriverForBackdrop
-      hideModalContentWhileAnimating
+      hideModalContentWhileAnimating={false}
       propagateSwipe
+      avoidKeyboard={true}
+      keyboardAvoidingViewEnabled={Platform.OS === "ios"}
     >
       <View
         style={[
           styles.container,
-          maxHeight ? { height: maxHeight } : undefined,
+          { 
+            height: modalHeight,
+            maxHeight: modalHeight,
+            minHeight: 400
+          },
         ]}
         className="bg-gray-900 rounded-t-3xl"
       >
-        <SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
+        <SafeAreaView edges={["bottom"]} style={{ flex: 1, minHeight: 0 }}>
           {/* Handle Bar */}
           {showHandleBar && (
             <View className="items-center pt-3 pb-2">
@@ -88,5 +109,7 @@ const styles = StyleSheet.create({
   container: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    backgroundColor: "#111827", // bg-gray-900
+    width: "100%",
   },
 });

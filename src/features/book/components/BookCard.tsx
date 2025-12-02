@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import type { BookPopulated } from "@shared-types/book.type";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 
 type Props = {
   book: BookPopulated;
@@ -9,9 +10,10 @@ type Props = {
 };
 
 export const BookCard = ({ book, onAddToCart, onPress }: Props) => {
-  const coverImage =
-    book.cover_image ??
-    "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop";
+  const coverImage = validateImageUri(
+    book.cover_image,
+    "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
+  );
   const authorNames = book.authors && book.authors.length > 0
     ? book.authors.map(a => a.name).join(", ")
     : "Tác giả đang cập nhật";

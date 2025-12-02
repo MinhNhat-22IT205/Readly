@@ -25,6 +25,21 @@ const PayOSPaymentScreen = () => {
   const { checkoutUrl, orderId } = (route.params as RouteParams) || {};
   const [loading, setLoading] = useState(true);
 
+  // Validate checkoutUrl
+  if (!checkoutUrl) {
+    return (
+      <SafeAreaView className="flex-1 bg-neutral-950 items-center justify-center">
+        <Text className="text-white text-lg">Lỗi: Không tìm thấy URL thanh toán</Text>
+        <TouchableOpacity
+          className="mt-4 bg-emerald-500 px-6 py-3 rounded-lg"
+          onPress={() => navigation.goBack()}
+        >
+          <Text className="text-black font-semibold">Quay lại</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   // Xử lý khi WebView navigate (detect returnUrl/cancelUrl từ PayOS)
   const handleNavigationStateChange = (navState: WebViewNavigation) => {
     const { url } = navState;
@@ -61,35 +76,6 @@ const PayOSPaymentScreen = () => {
       <SafeAreaView className="flex-1 bg-neutral-950 items-center justify-center">
         <ActivityIndicator size="large" color="#34d399" />
         <Text className="text-white mt-4">Đang chuyển đến PayOS...</Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (!checkoutUrl) {
-    return (
-      <SafeAreaView className="flex-1 bg-neutral-950">
-        <View className="flex-row items-center justify-between px-4 py-3">
-          <TouchableOpacity
-            className="w-10 h-10 rounded-full bg-neutral-900 items-center justify-center"
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="chevron-back" size={20} color="#fff" />
-          </TouchableOpacity>
-          <Text className="text-white text-lg font-semibold">Thanh toán PayOS</Text>
-          <View className="w-10 h-10" />
-        </View>
-        <View className="flex-1 items-center justify-center px-6">
-          <Ionicons name="alert-circle" size={48} color="#f87171" />
-          <Text className="text-white text-lg font-semibold mt-4 text-center">
-            Không tìm thấy URL thanh toán
-          </Text>
-          <TouchableOpacity
-            className="bg-emerald-500 rounded-full px-6 py-3 mt-4"
-            onPress={() => navigation.goBack()}
-          >
-            <Text className="text-black font-semibold">Quay lại</Text>
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
     );
   }

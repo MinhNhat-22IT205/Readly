@@ -2,6 +2,7 @@ import React from "react";
 import { ScrollView, View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SummaryPopulated } from "@shared-types/summary.type";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 
 interface AdminSummaryListProps {
   summaries: SummaryPopulated[];
@@ -42,17 +43,13 @@ export const AdminSummaryList = ({
           activeOpacity={0.8}
         >
           <View className="w-20 h-28 mr-4 rounded-xl overflow-hidden bg-gray-700 items-center justify-center">
-            {summary.book?.cover_image ? (
-              <Image
-                source={{ uri: summary.book.cover_image }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            ) : (
-              <View className="flex-1 items-center justify-center">
-                <Ionicons name="image-outline" size={24} color="#4B5563" />
-              </View>
-            )}
+            <Image
+              source={{
+                uri: validateImageUri(summary.book?.cover_image),
+              }}
+              className="w-full h-full"
+              resizeMode="cover"
+            />
           </View>
 
           <View className="flex-1 justify-between">

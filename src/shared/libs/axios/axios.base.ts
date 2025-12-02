@@ -3,7 +3,7 @@ import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import axios from "axios";
 
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || "http://192.168.1.12:8000";
+  process.env.EXPO_PUBLIC_API_BASE_URL || "http://192.168.1.220:8000";
 
 // Log baseURL để debug (chỉ trong development)
 if (__DEV__) {

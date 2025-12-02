@@ -46,10 +46,17 @@ export const submitOrder = async (
   // Giả sử payload.total đã được tính đúng đơn vị VND ở FE
   const totalAmountVND = Math.round(payload.total);
 
+  // Map payment method: Frontend dùng "cod" | "card" | "bank_transfer", backend nhận str | None
+  const validPaymentMethods: PaymentMethod[] = ["cod", "card", "bank_transfer"];
+  const paymentMethod =
+    validPaymentMethods.includes(payload.paymentMethod)
+      ? payload.paymentMethod
+      : null;
+
   // 1) Tạo order
   const orderRes = await axiosInstance.post<Order>(ORDERS_ENDPOINT, {
     total_amount: totalAmountVND,
-    payment_method: payload.paymentMethod,
+    payment_method: paymentMethod,
     // payment_status để BE mặc định pending
     recipient_name: payload.shippingInfo.fullName,
     address: payload.shippingInfo.address,
@@ -82,7 +89,7 @@ export const fetchOrders = async (): Promise<Order[]> => {
 };
 
 export const fetchAdminOrders = async (): Promise<Order[]> => {
-  const response = await axiosInstance.get<Order[]>(`${ORDERS_ENDPOINT}admin/`);
+  const response = await axiosInstance.get<Order[]>(`${ORDERS_ENDPOINT}admin`);
   return response.data;
 };
 
@@ -123,9 +130,23 @@ export const updateAdminOrder = async (
   orderId: number,
   payload: UpdateAdminOrderPayload
 ): Promise<Order> => {
+  // Validate payment_method nếu có trong payload
+  const validPaymentMethods: PaymentMethod[] = ["cod", "card", "bank_transfer"];
+  const sanitizedPayload = { ...payload };
+  
+  if (sanitizedPayload.payment_method !== undefined) {
+    sanitizedPayload.payment_method =
+      typeof sanitizedPayload.payment_method === "string" &&
+      validPaymentMethods.includes(
+        sanitizedPayload.payment_method as PaymentMethod
+      )
+        ? sanitizedPayload.payment_method
+        : null;
+  }
+
   const response = await axiosInstance.patch<Order>(
     `${ORDERS_ENDPOINT}admin/${orderId}`,
-    payload
+    sanitizedPayload
   );
   return response.data;
 };

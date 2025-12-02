@@ -8,6 +8,7 @@ import WriterStack from "./WriterStack";
 import AdminStack from "./AdminStack";
 import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import ProfileStack from "./ProfileStack";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 
 const Tab = createBottomTabNavigator();
 
@@ -35,7 +36,7 @@ export default function AppTabs() {
               : DUMMY_AVATAR;
             return (
               <Image
-                source={{ uri: avatarUri }}
+                source={{ uri: validateImageUri(avatarUri, DUMMY_AVATAR) }}
                 style={{
                   width: size,
                   height: size,

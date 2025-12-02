@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PopulatedFavourite } from "@shared-types/favourite.type";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 
 // Helper function to format read count (e.g., 8000000 -> "8m")
 const formatReadCount = (count: number): string => {
@@ -23,10 +24,15 @@ export const FavouriteItem = ({
 }) => {
   const views = formatReadCount(favourite.summary.read_count);
 
+  const coverImage = validateImageUri(
+    favourite.summary.book.cover_image,
+    "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
+  );
+
   return (
     <TouchableOpacity className="w-32 mr-3" onPress={onPress}>
       <Image
-        source={{ uri: favourite.summary.book.cover_image }}
+        source={{ uri: coverImage }}
         className="w-32 h-44 rounded-lg bg-zinc-900"
       />
       <Text className="text-sm font-semibold text-white mt-2" numberOfLines={1}>

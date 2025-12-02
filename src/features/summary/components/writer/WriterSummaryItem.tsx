@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Summary, SummaryPopulated } from "@shared-types/summary.type";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 
 interface WriterSummaryItemProps {
   summary: SummaryPopulated;
@@ -64,7 +65,12 @@ export const WriterSummaryItem = ({
       activeOpacity={0.7}
     >
       <Image
-        source={{ uri: summary.book?.cover_image ?? undefined }}
+        source={{
+          uri: validateImageUri(
+            summary.book?.cover_image,
+            "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
+          ),
+        }}
         className="w-24 h-32 rounded-lg bg-gray-700"
       />
       <View className="flex-1 ml-4 justify-between">

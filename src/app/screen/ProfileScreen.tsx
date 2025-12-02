@@ -19,6 +19,7 @@ import { isServerError } from "@shared-utils/is-server-error";
 import Toast from "react-native-toast-message";
 import { useNavigation } from "@react-navigation/native";
 import { BASE_API_URL } from "@shared-constants/base-api-path";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 
 const DUMMY_AVATAR =
   "https://velle.vn/wp-content/uploads/2025/04/avatar-mac-dinh-4-2.jpg";
@@ -106,10 +107,12 @@ export default function ProfileScreen() {
       setSelectedImageUri(result.assets[0].uri);
     }
   };
-  const avatarUri =
+  const avatarUriRaw =
     selectedImageUri ||
-    process.env.EXPO_PUBLIC_API_BASE_URL + endUser.profile_image ||
-    DUMMY_AVATAR;
+    (endUser.profile_image
+      ? process.env.EXPO_PUBLIC_API_BASE_URL + endUser.profile_image
+      : DUMMY_AVATAR);
+  const avatarUri = validateImageUri(avatarUriRaw, DUMMY_AVATAR);
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-900">
