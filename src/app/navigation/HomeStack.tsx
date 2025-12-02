@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "@app/screen/HomeScreen";
 import SummaryDetailsScreen from "@app/screen/SummaryDetailsScreen";
 import BookStoreScreen from "@app/screen/BookStoreScreen";
+import BookStoreDetailScreen from "@app/screen/BookStoreDetailScreen";
 import CartScreen from "@app/screen/CartScreen";
 import CheckoutScreen from "@app/screen/CheckoutScreen";
 import OrderResultScreen from "@app/screen/OrderResultScreen";
@@ -13,6 +14,7 @@ export type HomeStackParamList = {
   Home: undefined;
   SummaryDetails: { summaryId: string };
   BookStore: undefined;
+  BookStoreDetail: { bookId: string };
   Cart: undefined;
   Checkout: undefined;
   PayOSPayment: { checkoutUrl: string; orderId: number };
@@ -28,6 +30,7 @@ export default function HomeStack() {
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="SummaryDetails" component={SummaryDetailsScreen} />
       <Stack.Screen name="BookStore" component={BookStoreScreen} />
+      <Stack.Screen name="BookStoreDetail" component={BookStoreDetailScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
       <Stack.Screen name="PayOSPayment" component={PayOSPaymentScreen} />

@@ -22,3 +22,10 @@ export const fetchBooksWithoutSummary = async (): Promise<BookPopulated[]> => {
   );
   return response.data;
 };
+
+export const fetchBookById = async (bookId: string): Promise<BookPopulated> => {
+  const response = await axiosInstance.get<BookPopulated>(
+    `${BOOKS_ENDPOINT}/${bookId}`
+  );
+  return response.data;
+};

@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import React, { useEffect, useRef } from "react";
+import { NavigationContainer, NavigationContainerRef } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { LoginScreen } from "@app/screen/LoginScreen";
 import { RegisterScreen } from "@app/screen/RegisterScreen";
@@ -18,6 +18,10 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   Home: undefined; // This is where user goes after login
 };
+
+// Navigation ref for programmatic navigation
+// Sử dụng createRef thay vì useRef vì cần export để dùng ở nơi khác
+export const navigationRef = React.createRef<NavigationContainerRef<any>>();
 
 export default function AppNavigator() {
   const access_token = useAuthStore((state) => state.access_token);
@@ -85,7 +89,21 @@ export default function AppNavigator() {
   }, [access_token]);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => {
+        // Navigation is ready - context đã sẵn sàng cho tất cả screens
+        // Có thể remove console.log trong production
+        if (__DEV__) {
+          console.log("NavigationContainer is ready");
+        }
+      }}
+      onStateChange={() => {
+        // Optional: Handle navigation state changes
+        // const currentRoute = navigationRef.current?.getCurrentRoute();
+        // console.log("Current route:", currentRoute?.name);
+      }}
+    >
       {isLoggedIn ? (
         <AppTabs />
       ) : (
