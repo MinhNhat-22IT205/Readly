@@ -5,6 +5,7 @@ import {
   ScrollView,
   StatusBar,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,6 +13,8 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AdminStackParamList } from "../navigation/AdminStack";
 import { AdminProtectedScreen } from "@shared-components/AdminProtectedScreen";
+import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type AdminDashboardScreenNavigationProp = NativeStackNavigationProp<
   AdminStackParamList,
@@ -39,6 +42,7 @@ const ManagementButton = ({ icon, label, onPress }: ManagementButtonProps) => (
 
 export default function AdminDashboardScreen() {
   const navigation = useNavigation<AdminDashboardScreenNavigationProp>();
+  const clearAuth = useAuthStore((s) => s.clearAuth);
 
   const handleUserManagement = () => {
     navigation.navigate("UserManagement");
@@ -76,6 +80,20 @@ export default function AdminDashboardScreen() {
     // TODO: Navigate to Settings screen
     console.log("Navigate to Settings");
   };
+  const handleLogout = async () => {
+    try {
+      // Clear store first
+      clearAuth();
+      // Remove persisted token in storage (navigator will react to store change)
+      if (Platform.OS === "web") {
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.removeItem("auth_token");
+        }
+      } else {
+        await AsyncStorage.removeItem("auth_token");
+      }
+    } catch {}
+  };
 
   return (
     <AdminProtectedScreen>
@@ -86,11 +104,10 @@ export default function AdminDashboardScreen() {
         <View className="flex-row items-center justify-between px-4 py-4">
           <Text className="text-2xl font-bold text-white">Admin Dashboard</Text>
           <TouchableOpacity
-            onPress={handleSettings}
-            className="p-2"
-            activeOpacity={0.7}
+            onPress={handleLogout}
+            className="px-3 py-2 bg-red-500 rounded-md"
           >
-            <Ionicons name="settings-outline" size={24} color="#FFFFFF" />
+            <Text className="text-white font-semibold">Logout</Text>
           </TouchableOpacity>
         </View>
 
@@ -180,4 +197,3 @@ export default function AdminDashboardScreen() {
     </AdminProtectedScreen>
   );
 }
-
