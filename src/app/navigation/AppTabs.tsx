@@ -62,11 +62,13 @@ export default function AppTabs() {
         },
       })}
     >
+      {!isAdmin && <Tab.Screen name="Home" component={HomeStack} />}
+      {!isAdmin && <Tab.Screen name="Explore" component={LoginScreen} />}
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Explore" component={ExploreStack} />
       {isWriter && <Tab.Screen name="Writer" component={WriterStack} />}
       {isAdmin && <Tab.Screen name="Admin" component={AdminStack} />}
-      <Tab.Screen name="Profile" component={ProfileStack} />
+      {!isAdmin && <Tab.Screen name="Profile" component={ProfileStack} />}
     </Tab.Navigator>
   );
 }

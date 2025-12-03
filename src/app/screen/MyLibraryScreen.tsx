@@ -67,9 +67,7 @@ export default function MyLibraryScreen() {
       } else {
         await AsyncStorage.removeItem("auth_token");
       }
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    } catch {}
   };
 
   const handleProfilePress = () => {
