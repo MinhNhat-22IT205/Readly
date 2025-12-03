@@ -23,7 +23,7 @@ import { ReadingHistoryPopulated } from "@shared-types/reading-history.type";
 import { PopulatedFavourite } from "@shared-types/favourite.type";
 import { useNavigation } from "@react-navigation/native";
 
-type TabType = "Favourites" | "History" | "Highlights";
+type TabType = "Favourites" | "History";
 
 export default function MyLibraryScreen() {
   const [activeTab, setActiveTab] = useState<TabType>("Favourites");
@@ -91,7 +91,7 @@ export default function MyLibraryScreen() {
     });
   };
 
-  const tabs: TabType[] = ["Favourites", "History", "Highlights"];
+  const tabs: TabType[] = ["Favourites", "History"];
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -147,15 +147,7 @@ export default function MyLibraryScreen() {
             />
           </View>
         );
-      case "Highlights":
-        return (
-          <View className="flex-1 items-center justify-center py-20">
-            <Ionicons name="bookmark-outline" size={64} color="#666" />
-            <Text className="text-gray-400 text-lg mt-4">
-              No highlights yet
-            </Text>
-          </View>
-        );
+
       default:
         return null;
     }

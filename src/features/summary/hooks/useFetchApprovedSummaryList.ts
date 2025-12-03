@@ -8,7 +8,10 @@ import {
 export default function useFetchApprovedSummaryList() {
   const { data, error, isLoading, mutate } = useSWR<SummaryPopulated[]>(
     "approved-summaries",
-    fetchRecommendedSummaries
+    fetchRecommendedSummaries,
+    {
+      refreshInterval: 5000, // auto-reload every 5 seconds
+    }
   );
 
   return {
