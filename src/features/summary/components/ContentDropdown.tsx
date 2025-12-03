@@ -1,8 +1,17 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import { WebView } from "react-native-webview";
+import { View, Text, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ContentSection } from "@shared-types/content_section.type";
+
+// Conditional import for WebView - chỉ import khi không phải web
+let WebView: any = null;
+if (Platform.OS !== "web") {
+  try {
+    WebView = require("react-native-webview").WebView;
+  } catch (e) {
+    console.warn("WebView not available on this platform");
+  }
+}
 
 interface ContentDropdownProps {
   section: ContentSection;
@@ -130,19 +139,69 @@ export const ContentDropdown = ({
         <View className="px-5 pb-6 pt-4 bg-gray-800">
           <View className="border-t border-gray-700 pt-4">
             {section.content ? (
-              <WebView
-                source={{ html: htmlContent }}
-                style={{
-                  backgroundColor: "transparent",
-                  height: webViewHeight,
-                }}
-                scrollEnabled={false}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-                onMessage={handleMessage}
-                javaScriptEnabled={true}
-                domStorageEnabled={true}
-              />
+              Platform.OS === "web" ? (
+                // Fallback cho web platform - strip HTML và hiển thị text thuần
+                <View
+                  style={{
+                    backgroundColor: "#1F2937",
+                    padding: 16,
+                    borderRadius: 8,
+                    minHeight: 200,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#F3F4F6",
+                      fontSize: 16,
+                      lineHeight: 24,
+                    }}
+                  >
+                    {section.content
+                      .replace(/<[^>]*>/g, "") // Strip HTML tags
+                      .replace(/&nbsp;/g, " ")
+                      .replace(/&amp;/g, "&")
+                      .replace(/&lt;/g, "<")
+                      .replace(/&gt;/g, ">")
+                      .replace(/&quot;/g, '"')
+                      .replace(/&#39;/g, "'")
+                      .trim()}
+                  </Text>
+                </View>
+              ) : WebView ? (
+                <WebView
+                  source={{ html: htmlContent }}
+                  style={{
+                    backgroundColor: "transparent",
+                    height: webViewHeight,
+                  }}
+                  scrollEnabled={false}
+                  showsVerticalScrollIndicator={false}
+                  showsHorizontalScrollIndicator={false}
+                  onMessage={handleMessage}
+                  javaScriptEnabled={true}
+                  domStorageEnabled={true}
+                />
+              ) : (
+                // Fallback nếu WebView không khả dụng
+                <View
+                  style={{
+                    backgroundColor: "#1F2937",
+                    padding: 16,
+                    borderRadius: 8,
+                    minHeight: 200,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#F3F4F6",
+                      fontSize: 16,
+                      lineHeight: 24,
+                    }}
+                  >
+                    {section.content.replace(/<[^>]*>/g, "")}
+                  </Text>
+                </View>
+              )
             ) : (
               <Text className="text-gray-400 text-base italic">
                 No content available

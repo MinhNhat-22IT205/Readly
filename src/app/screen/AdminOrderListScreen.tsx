@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,10 +10,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { fetchAdminOrders, type Order } from "@features/order/api/order.api";
 import type { AdminStackParamList } from "../navigation/AdminStack";
+import { RevenueStats } from "@features/order/components/RevenueStats";
+import { PaymentStatusPieChart } from "@features/order/components/PaymentStatusPieChart";
 
 type AdminOrderListScreenNavigationProp = NativeStackNavigationProp<
   AdminStackParamList,
@@ -49,6 +51,13 @@ const AdminOrderListScreen = () => {
     loadOrders();
   }, []);
 
+  // Reload orders khi quay lại màn hình này (sau khi lưu thay đổi ở detail screen)
+  useFocusEffect(
+    useCallback(() => {
+      loadOrders();
+    }, [])
+  );
+
   const onRefresh = () => {
     setRefreshing(true);
     loadOrders();
@@ -64,6 +73,14 @@ const AdminOrderListScreen = () => {
       style: "currency",
       currency: "VND",
     }).format(amount);
+  };
+
+  // Kiểm tra đơn hàng đã hoàn thành (đã thanh toán VÀ đã giao hàng)
+  const isOrderCompleted = (order: Order) => {
+    return (
+      order.payment_status === "completed" &&
+      order.shipment_status === "delivered"
+    );
   };
 
   const getPaymentBadge = (status: Order["payment_status"]) => {
@@ -179,7 +196,19 @@ const AdminOrderListScreen = () => {
             />
           }
         >
-          {orders.map((order) => {
+          {/* Revenue Statistics */}
+          <RevenueStats orders={orders} />
+
+          {/* Pie Chart - Doanh thu theo trạng thái thanh toán */}
+          <PaymentStatusPieChart orders={orders} />
+
+          {/* Orders List */}
+          <View className="mt-4">
+            <Text className="text-white text-lg font-bold mb-4">
+              Danh sách đơn hàng
+            </Text>
+            {orders.map((order) => {
+            const completed = isOrderCompleted(order);
             const payment = getPaymentBadge(order.payment_status);
             const shipment = getShipmentBadge(order.shipment_status);
 
@@ -212,30 +241,49 @@ const AdminOrderListScreen = () => {
                 </View>
 
                 <View className="flex-row mt-2">
-                  <View className="flex-row items-center mr-4">
-                    <View
-                      className="w-2 h-2 rounded-full mr-1.5"
-                      style={{ backgroundColor: payment.color }}
-                    />
-                    <Text
-                      className="text-xs"
-                      style={{ color: payment.color }}
-                    >
-                      {payment.label}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center">
-                    <View
-                      className="w-2 h-2 rounded-full mr-1.5"
-                      style={{ backgroundColor: shipment.color }}
-                    />
-                    <Text
-                      className="text-xs"
-                      style={{ color: shipment.color }}
-                    >
-                      {shipment.label}
-                    </Text>
-                  </View>
+                  {completed ? (
+                    // Hiển thị trạng thái "Đã hoàn thành" nếu đơn đã thanh toán VÀ đã giao hàng
+                    <View className="flex-row items-center">
+                      <View
+                        className="w-2 h-2 rounded-full mr-1.5"
+                        style={{ backgroundColor: "#22c55e" }}
+                      />
+                      <Text
+                        className="text-xs font-semibold"
+                        style={{ color: "#22c55e" }}
+                      >
+                        Đã hoàn thành
+                      </Text>
+                    </View>
+                  ) : (
+                    // Hiển thị các badge riêng biệt nếu chưa hoàn thành
+                    <>
+                      <View className="flex-row items-center mr-4">
+                        <View
+                          className="w-2 h-2 rounded-full mr-1.5"
+                          style={{ backgroundColor: payment.color }}
+                        />
+                        <Text
+                          className="text-xs"
+                          style={{ color: payment.color }}
+                        >
+                          {payment.label}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center">
+                        <View
+                          className="w-2 h-2 rounded-full mr-1.5"
+                          style={{ backgroundColor: shipment.color }}
+                        />
+                        <Text
+                          className="text-xs"
+                          style={{ color: shipment.color }}
+                        >
+                          {shipment.label}
+                        </Text>
+                      </View>
+                    </>
+                  )}
                 </View>
 
                 {order.recipient_name && (
@@ -253,6 +301,7 @@ const AdminOrderListScreen = () => {
               </TouchableOpacity>
             );
           })}
+          </View>
         </ScrollView>
       )}
     </SafeAreaView>

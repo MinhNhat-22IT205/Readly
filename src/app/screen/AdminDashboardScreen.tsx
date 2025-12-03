@@ -68,10 +68,6 @@ export default function AdminDashboardScreen() {
     navigation.navigate("AdminOrderList");
   };
 
-  const handlePendingSummaries = () => {
-    navigation.navigate("AdminSummaryList");
-  };
-
   const handleManageSummaries = () => {
     navigation.navigate("AdminManageSummaries");
   };
@@ -167,9 +163,9 @@ export default function AdminDashboardScreen() {
               </View>
               <View className="flex-1 ml-2">
                 <ManagementButton
-                  icon="document-text-outline"
-                  label="Pending Summaries"
-                  onPress={handlePendingSummaries}
+                  icon="list-outline"
+                  label="Manage Summaries"
+                  onPress={handleManageSummaries}
                 />
               </View>
             </View>
@@ -177,13 +173,6 @@ export default function AdminDashboardScreen() {
             {/* Row 4 */}
             <View className="flex-row justify-between">
               <View className="flex-1 mr-2">
-                <ManagementButton
-                  icon="list-outline"
-                  label="Manage Summaries"
-                  onPress={handleManageSummaries}
-                />
-              </View>
-              <View className="flex-1 ml-2">
                 <ManagementButton
                   icon="receipt-outline"
                   label="Order Management"

@@ -64,7 +64,7 @@ export default function AppTabs() {
     >
       {/*
         Nếu là admin:
-        - Chỉ hiển thị tab Admin và Profile
+        - Chỉ hiển thị tab Admin
         Nếu KHÔNG phải admin:
         - Hiển thị Home, Explore, (Writer nếu là writer) và Profile
       */}
@@ -73,10 +73,10 @@ export default function AppTabs() {
           <Tab.Screen name="Home" component={HomeStack} />
           <Tab.Screen name="Explore" component={ExploreStack} />
           {isWriter && <Tab.Screen name="Writer" component={WriterStack} />}
+          <Tab.Screen name="Profile" component={ProfileStack} />
         </>
       )}
       {isAdmin && <Tab.Screen name="Admin" component={AdminStack} />}
-      <Tab.Screen name="Profile" component={ProfileStack} />
     </Tab.Navigator>
   );
 }

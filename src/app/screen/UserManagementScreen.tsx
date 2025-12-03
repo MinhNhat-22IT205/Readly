@@ -34,6 +34,7 @@ type StatusFilter = "all" | "active" | "inactive";
 export default function UserManagementScreen() {
   const navigation = useNavigation<UserManagementScreenNavigationProp>();
   const [users, setUsers] = useState<User[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]); // Tất cả users để tính stats
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -41,6 +42,16 @@ export default function UserManagementScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<FilterType>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+
+  // Load tất cả users để tính stats (không filter)
+  const loadAllUsersForStats = useCallback(async () => {
+    try {
+      const data = await fetchUsers(); // Load tất cả users không filter
+      setAllUsers(data);
+    } catch (error) {
+      console.error("Failed to load all users for stats:", error);
+    }
+  }, []);
 
   const loadUsers = useCallback(async () => {
     try {
@@ -62,6 +73,8 @@ export default function UserManagementScreen() {
       // }
 
       console.log("🔍 Loading users with filters:", filters);
+      
+      // Load filtered users for display
       const data = await fetchUsers(filters);
       console.log("✅ Loaded users:", data.length);
       
@@ -98,6 +111,11 @@ export default function UserManagementScreen() {
     }
   }, [roleFilter, statusFilter, searchQuery]);
 
+  // Load all users for stats on mount
+  useEffect(() => {
+    loadAllUsersForStats();
+  }, [loadAllUsersForStats]);
+
   // Load users when filters change (role or status)
   useEffect(() => {
     loadUsers();
@@ -111,9 +129,10 @@ export default function UserManagementScreen() {
         isInitialMount.current = false;
         return;
       }
-      // Reload users when returning to this screen
+      // Reload both allUsers (for stats) and filtered users when returning to this screen
+      loadAllUsersForStats();
       loadUsers();
-    }, [loadUsers])
+    }, [loadAllUsersForStats, loadUsers])
   );
 
   // Filter users locally when search query changes (only for search, not for role/status)
@@ -139,6 +158,7 @@ export default function UserManagementScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
+    loadAllUsersForStats();
     loadUsers();
   };
 
@@ -149,7 +169,15 @@ export default function UserManagementScreen() {
   const handleToggleActive = async (user: User) => {
     try {
       const updatedUser = await toggleUserActive(user.id, !user.is_active);
+      // Cập nhật cả users và allUsers
       setUsers((prev) =>
+        prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+      );
+      setAllUsers((prev) =>
+        prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+      );
+      // Cập nhật filteredUsers nếu user đó đang được hiển thị
+      setFilteredUsers((prev) =>
         prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
       );
       Toast.show({
@@ -168,14 +196,15 @@ export default function UserManagementScreen() {
   };
 
   const stats = useMemo(() => {
-    const total = users.length;
-    const active = users.filter((u) => u.is_active).length;
-    const readers = users.filter((u) => u.role === "reader").length;
-    const writers = users.filter((u) => u.role === "writer").length;
-    const admins = users.filter((u) => u.role === "admin").length;
+    // Tính stats từ tất cả users (allUsers) để hiển thị tổng số users theo role trong toàn bộ hệ thống
+    const total = allUsers.length;
+    const active = allUsers.filter((u) => u.is_active).length;
+    const readers = allUsers.filter((u) => u.role === "reader").length;
+    const writers = allUsers.filter((u) => u.role === "writer").length;
+    const admins = allUsers.filter((u) => u.role === "admin").length;
 
     return { total, active, readers, writers, admins };
-  }, [users]);
+  }, [allUsers]);
 
   if (isLoading && users.length === 0) {
     return (

@@ -26,105 +26,105 @@ export const AdminActionButtons = ({
   const [loading, setLoading] = useState<"approve" | "reject" | null>(null);
 
   const handleApprove = async () => {
-    Alert.alert(
-      "Approve Summary",
-      "Are you sure you want to approve this summary?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Approve",
-          onPress: async () => {
-            try {
-              setLoading("approve");
-              await onApproveSummary(summaryId);
-              onStatusChange?.("approved");
-              Alert.alert("Success", "Summary approved successfully");
-            } catch (error) {
-              Alert.alert("Error", "Failed to approve summary");
-            } finally {
-              setLoading(null);
-            }
-          },
-        },
-      ]
-    );
+    console.log("handleApprove called", { loading, currentStatus });
+    if (loading !== null) {
+      console.log("Button is disabled, returning");
+      return; // Prevent double clicks
+    }
+    const isAlreadyRejected = currentStatus === "rejected";
+    const isAlreadyApproved = currentStatus === "approved";
+    console.log("Showing approve alert");
+    
+    try {
+      setLoading("approve");
+      await onApproveSummary(summaryId);
+      onStatusChange?.("approved");
+      Alert.alert(
+        "Success",
+        isAlreadyRejected
+          ? "Summary has been approved (previously rejected)"
+          : "Summary approved successfully"
+      );
+    } catch (error) {
+      console.error("Approve error:", error);
+      Alert.alert("Error", "Failed to approve summary");
+    } finally {
+      setLoading(null);
+    }
   };
 
   const handleReject = async () => {
-    Alert.alert(
-      "Reject Summary",
-      "Are you sure you want to reject this summary?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Reject",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setLoading("reject");
-              await onRejectSUmmary(summaryId);
-              onStatusChange?.("rejected");
-              Alert.alert("Success", "Summary rejected");
-            } catch (error) {
-              Alert.alert("Error", "Failed to reject summary");
-            } finally {
-              setLoading(null);
-            }
-          },
-        },
-      ]
-    );
+    console.log("handleReject called", { loading, currentStatus });
+    if (loading !== null) {
+      console.log("Button is disabled, returning");
+      return; // Prevent double clicks
+    }
+    const isAlreadyApproved = currentStatus === "approved";
+    console.log("Processing reject");
+    
+    try {
+      setLoading("reject");
+      await onRejectSUmmary(summaryId);
+      onStatusChange?.("rejected");
+      Alert.alert(
+        "Success",
+        isAlreadyApproved
+          ? "Summary has been rejected (previously approved)"
+          : "Summary rejected"
+      );
+    } catch (error) {
+      console.error("Reject error:", error);
+      Alert.alert("Error", "Failed to reject summary");
+    } finally {
+      setLoading(null);
+    }
   };
 
-  // Only show buttons if status is waiting_for_approval
-  if (currentStatus !== "waiting_for_approval") {
-    return (
-      <View className="px-4 mt-6">
-        <View className="bg-gray-800 rounded-xl p-4 flex-row items-center justify-center">
-          <Ionicons
-            name={
-              currentStatus === "approved"
-                ? "checkmark-circle"
-                : currentStatus === "rejected"
-                  ? "close-circle"
-                  : "time-outline"
-            }
-            size={20}
-            color={
-              currentStatus === "approved"
-                ? "#10b981"
-                : currentStatus === "rejected"
-                  ? "#ef4444"
-                  : "#9ca3af"
-            }
-          />
-          <Text className="text-gray-300 ml-2 font-semibold capitalize">
-            {currentStatus === "approved"
-              ? "Approved"
-              : currentStatus === "rejected"
-                ? "Rejected"
-                : "Writing"}
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
+  // Hiển thị status badge và action buttons
+  // Admin có thể approve/reject bất kỳ lúc nào (kể cả khi đã approve hoặc reject)
   return (
     <View className="px-4 mt-6">
+      {/* Status Badge */}
+      <View className="bg-gray-800 rounded-xl p-4 flex-row items-center justify-center mb-4">
+        <Ionicons
+          name={
+            currentStatus === "approved"
+              ? "checkmark-circle"
+              : currentStatus === "rejected"
+                ? "close-circle"
+                : currentStatus === "waiting_for_approval"
+                  ? "hourglass-outline"
+                  : "time-outline"
+          }
+          size={20}
+          color={
+            currentStatus === "approved"
+              ? "#10b981"
+              : currentStatus === "rejected"
+                ? "#ef4444"
+                : "#9ca3af"
+          }
+        />
+        <Text className="text-gray-300 ml-2 font-semibold capitalize">
+          {currentStatus === "approved"
+            ? "Approved"
+            : currentStatus === "rejected"
+              ? "Rejected"
+              : currentStatus === "waiting_for_approval"
+                ? "Waiting for Approval"
+                : "Writing"}
+        </Text>
+      </View>
+
+      {/* Action Buttons - Luôn hiển thị cả 2 button để admin có thể chuyển đổi status bất kỳ lúc nào */}
       <View className="flex-row gap-3">
+        {/* Approve Button */}
         <TouchableOpacity
           onPress={handleApprove}
           disabled={loading !== null}
           className="flex-1 bg-green-600 py-4 rounded-xl flex-row items-center justify-center"
-          activeOpacity={0.8}
-          style={{ opacity: loading === "reject" ? 0.5 : 1 }}
+          activeOpacity={loading !== null ? 1 : 0.8}
+          style={{ minHeight: 48 }}
         >
           {loading === "approve" ? (
             <ActivityIndicator color="#FFFFFF" />
@@ -132,18 +132,23 @@ export const AdminActionButtons = ({
             <>
               <Ionicons name="checkmark-circle" size={20} color="white" />
               <Text className="text-white ml-2 font-semibold text-base">
-                Approve
+                {currentStatus === "approved"
+                  ? "Approve Again"
+                  : currentStatus === "rejected"
+                    ? "Approve"
+                    : "Approve"}
               </Text>
             </>
           )}
         </TouchableOpacity>
 
+        {/* Reject Button - Luôn hiển thị để admin có thể reject bất kỳ lúc nào, kể cả khi đã approve */}
         <TouchableOpacity
           onPress={handleReject}
           disabled={loading !== null}
           className="flex-1 bg-red-600 py-4 rounded-xl flex-row items-center justify-center"
-          activeOpacity={0.8}
-          style={{ opacity: loading === "approve" ? 0.5 : 1 }}
+          activeOpacity={loading !== null ? 1 : 0.8}
+          style={{ minHeight: 48 }}
         >
           {loading === "reject" ? (
             <ActivityIndicator color="#FFFFFF" />
@@ -151,7 +156,11 @@ export const AdminActionButtons = ({
             <>
               <Ionicons name="close-circle" size={20} color="white" />
               <Text className="text-white ml-2 font-semibold text-base">
-                Reject
+                {currentStatus === "approved"
+                  ? "Reject"
+                  : currentStatus === "rejected"
+                    ? "Reject Again"
+                    : "Reject"}
               </Text>
             </>
           )}

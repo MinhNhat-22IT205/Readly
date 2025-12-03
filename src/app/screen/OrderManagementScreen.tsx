@@ -80,6 +80,14 @@ const OrderManagementScreen = () => {
     }
   };
 
+  // Kiểm tra đơn hàng đã hoàn thành (đã thanh toán VÀ đã giao hàng)
+  const isOrderCompleted = (order: Order) => {
+    return (
+      order.payment_status === "completed" &&
+      order.shipment_status === "delivered"
+    );
+  };
+
   const getShipmentStatusInfo = (status: Order["shipment_status"]) => {
     switch (status) {
       case "delivered":
@@ -196,6 +204,7 @@ const OrderManagementScreen = () => {
           }
         >
           {orders.map((order) => {
+            const completed = isOrderCompleted(order);
             const paymentStatus = getPaymentStatusInfo(order.payment_status);
             const shipmentStatus = getShipmentStatusInfo(order.shipment_status);
 
@@ -223,32 +232,52 @@ const OrderManagementScreen = () => {
                 </View>
 
                 <View className="border-t border-neutral-800 pt-3 mt-3">
-                  <View className="flex-row items-center mb-2">
-                    <Ionicons
-                      name={paymentStatus.icon}
-                      size={18}
-                      color={paymentStatus.color}
-                    />
-                    <Text
-                      className="text-sm ml-2"
-                      style={{ color: paymentStatus.color }}
-                    >
-                      {paymentStatus.text}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center">
-                    <Ionicons
-                      name={shipmentStatus.icon}
-                      size={18}
-                      color={shipmentStatus.color}
-                    />
-                    <Text
-                      className="text-sm ml-2"
-                      style={{ color: shipmentStatus.color }}
-                    >
-                      {shipmentStatus.text}
-                    </Text>
-                  </View>
+                  {completed ? (
+                    // Hiển thị trạng thái "Đã hoàn thành" nếu đơn đã thanh toán VÀ đã giao hàng
+                    <View className="flex-row items-center">
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={18}
+                        color="#34d399"
+                      />
+                      <Text
+                        className="text-sm ml-2 font-semibold"
+                        style={{ color: "#34d399" }}
+                      >
+                        Đã hoàn thành
+                      </Text>
+                    </View>
+                  ) : (
+                    // Hiển thị các trạng thái riêng biệt nếu chưa hoàn thành
+                    <>
+                      <View className="flex-row items-center mb-2">
+                        <Ionicons
+                          name={paymentStatus.icon}
+                          size={18}
+                          color={paymentStatus.color}
+                        />
+                        <Text
+                          className="text-sm ml-2"
+                          style={{ color: paymentStatus.color }}
+                        >
+                          {paymentStatus.text}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center">
+                        <Ionicons
+                          name={shipmentStatus.icon}
+                          size={18}
+                          color={shipmentStatus.color}
+                        />
+                        <Text
+                          className="text-sm ml-2"
+                          style={{ color: shipmentStatus.color }}
+                        >
+                          {shipmentStatus.text}
+                        </Text>
+                      </View>
+                    </>
+                  )}
                 </View>
 
                 {order.recipient_name && (

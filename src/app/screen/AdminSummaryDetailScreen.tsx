@@ -229,14 +229,22 @@ export default function AdminSummaryDetailScreen() {
         title="Admin Review"
         maxHeight={600}
       >
-        <ScrollView nestedScrollEnabled>
-          <AdminActionButtons
-            summaryId={summaryId}
-            currentStatus={summary.status}
-            onApproveSummary={handleApproveSummary}
-            onRejectSUmmary={handleRejectSummary}
-            onStatusChange={handleStatusChange}
-          />
+        <ScrollView 
+          nestedScrollEnabled
+          keyboardShouldPersistTaps="handled"
+          scrollEnabled={true}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          showsVerticalScrollIndicator={true}
+        >
+          <View style={{ zIndex: 10 }}>
+            <AdminActionButtons
+              summaryId={summaryId}
+              currentStatus={summary.status}
+              onApproveSummary={handleApproveSummary}
+              onRejectSUmmary={handleRejectSummary}
+              onStatusChange={handleStatusChange}
+            />
+          </View>
 
           <AdminCommentPanel summaryId={summaryId} />
         </ScrollView>

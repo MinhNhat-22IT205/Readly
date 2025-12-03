@@ -133,7 +133,9 @@ const AdminOrderDetailScreen = () => {
       saveStateTimeoutRef.current = setTimeout(() => {
         setSaveState("idle");
         saveStateTimeoutRef.current = null;
-      }, 2000);
+        // Reload orders list khi quay lại
+        navigation.goBack();
+      }, 1500);
     } catch (error) {
       console.error("Failed to update order:", error);
       Alert.alert("Lỗi", "Không thể cập nhật đơn hàng. Vui lòng thử lại.");
