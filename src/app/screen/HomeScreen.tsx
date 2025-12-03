@@ -65,12 +65,12 @@ export default function HomeScreen() {
           <Text className="text-3xl font-bold text-white">Good Afternoon</Text>
           <View className="w-20 h-1 bg-white rounded mt-1" />
         </View>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={handleLogout}
           className="px-3 py-2 bg-red-500 rounded-md"
         >
           <Text className="text-white font-semibold">Logout</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Quick Access */}
@@ -131,24 +131,24 @@ export default function HomeScreen() {
         />
 
         {/* Trending */}
-        <SectionHeader
+        {/* <SectionHeader
           title="Trending"
           onShowAll={() => console.log("Show all Trending")}
         />
         <SummaryList
           summaries={summaries ?? []}
           onSummaryPress={handleSummaryPress}
-        />
+        /> */}
 
         {/* 5-Min Read */}
-        <SectionHeader
+        {/* <SectionHeader
           title="5-Minutes read"
           onShowAll={() => console.log("Show all 5-min read")}
         />
         <SummaryList
           summaries={summaries ?? []}
           onSummaryPress={handleSummaryPress}
-        />
+        /> */}
       </ScrollView>
     </SafeAreaView>
   );

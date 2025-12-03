@@ -11,13 +11,12 @@ export const SectionHeader = ({
 }) => (
   <View className="flex-row items-center justify-between px-4 mt-6 mb-3">
     <Text className="text-xl font-bold text-white">{title}</Text>
-    <TouchableOpacity
+    {/* <TouchableOpacity
       onPress={onShowAll}
       className="flex-row items-center gap-1"
     >
       <Text className="text-sm text-white">Show all</Text>
       <Ionicons name="chevron-forward" size={16} color="#fff" />
-    </TouchableOpacity>
+    </TouchableOpacity> */}
   </View>
 );
-
