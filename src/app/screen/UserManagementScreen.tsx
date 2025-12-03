@@ -29,7 +29,6 @@ type UserManagementScreenNavigationProp = NativeStackNavigationProp<
 >;
 
 type FilterType = "all" | "reader" | "writer" | "admin";
-type StatusFilter = "all" | "active" | "inactive";
 
 export default function UserManagementScreen() {
   const navigation = useNavigation<UserManagementScreenNavigationProp>();
@@ -41,15 +40,17 @@ export default function UserManagementScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<FilterType>("all");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   // Load tất cả users để tính stats (không filter)
   const loadAllUsersForStats = useCallback(async () => {
     try {
       const data = await fetchUsers(); // Load tất cả users không filter
+      console.log("📊 Loaded all users for stats:", data.length);
       setAllUsers(data);
     } catch (error) {
       console.error("Failed to load all users for stats:", error);
+      // Set empty array on error to prevent undefined issues
+      setAllUsers([]);
     }
   }, []);
 
@@ -60,10 +61,6 @@ export default function UserManagementScreen() {
       
       if (roleFilter !== "all") {
         filters.role = roleFilter;
-      }
-      
-      if (statusFilter !== "all") {
-        filters.is_active = statusFilter === "active";
       }
       
       // Note: Search is handled locally for instant filtering
@@ -109,7 +106,7 @@ export default function UserManagementScreen() {
       setIsLoading(false);
       setRefreshing(false);
     }
-  }, [roleFilter, statusFilter, searchQuery]);
+  }, [roleFilter, searchQuery]);
 
   // Load all users for stats on mount
   useEffect(() => {
@@ -196,14 +193,10 @@ export default function UserManagementScreen() {
   };
 
   const stats = useMemo(() => {
-    // Tính stats từ tất cả users (allUsers) để hiển thị tổng số users theo role trong toàn bộ hệ thống
+    // Tính stats từ tất cả users (allUsers) để hiển thị tổng số users
     const total = allUsers.length;
-    const active = allUsers.filter((u) => u.is_active).length;
-    const readers = allUsers.filter((u) => u.role === "reader").length;
-    const writers = allUsers.filter((u) => u.role === "writer").length;
-    const admins = allUsers.filter((u) => u.role === "admin").length;
 
-    return { total, active, readers, writers, admins };
+    return { total };
   }, [allUsers]);
 
   if (isLoading && users.length === 0) {
@@ -278,13 +271,7 @@ export default function UserManagementScreen() {
       </View>
 
       {/* Stats Bar */}
-      <UserStatsBar
-        total={stats.total}
-        active={stats.active}
-        readers={stats.readers}
-        writers={stats.writers}
-        admins={stats.admins}
-      />
+      <UserStatsBar total={stats.total} />
 
       {/* Search Bar */}
       <UserSearchBar
@@ -295,9 +282,7 @@ export default function UserManagementScreen() {
       {/* Filters */}
       <UserFilters
         roleFilter={roleFilter}
-        statusFilter={statusFilter}
         onRoleFilterChange={setRoleFilter}
-        onStatusFilterChange={setStatusFilter}
       />
 
       {/* User List */}

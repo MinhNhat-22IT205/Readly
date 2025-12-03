@@ -9,6 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Summary, SummaryPopulated } from "@shared-types/summary.type";
 import { validateImageUri } from "@shared-utils/validate-image-uri";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
 
 interface WriterSummaryItemProps {
   summary: SummaryPopulated;
@@ -67,7 +68,7 @@ export const WriterSummaryItem = ({
       <Image
         source={{
           uri: validateImageUri(
-            summary.book?.cover_image,
+            buildBookCoverUrl(summary.book?.cover_image),
             "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
           ),
         }}

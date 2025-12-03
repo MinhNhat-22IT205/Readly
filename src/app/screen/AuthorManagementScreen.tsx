@@ -136,11 +136,8 @@ export default function AuthorManagementScreen() {
 
   const stats = useMemo(() => {
     const total = authors.length;
-    const withBiography = authors.filter((a) => a.biography).length;
-    const withNationality = authors.filter((a) => a.nationality).length;
-    const withBirthDate = authors.filter((a) => a.birth_date).length;
 
-    return { total, withBiography, withNationality, withBirthDate };
+    return { total };
   }, [authors]);
 
   if (isLoading && authors.length === 0) {
@@ -226,18 +223,6 @@ export default function AuthorManagementScreen() {
           <View className="bg-gray-700/50 px-3 py-2 rounded-lg min-w-[80px]">
             <Text className="text-gray-400 text-xs">Tổng</Text>
             <Text className="text-white font-bold text-sm">{stats.total}</Text>
-          </View>
-          <View className="bg-blue-500/20 px-3 py-2 rounded-lg min-w-[80px]">
-            <Text className="text-gray-400 text-xs">Có tiểu sử</Text>
-            <Text className="text-blue-400 font-bold text-sm">{stats.withBiography}</Text>
-          </View>
-          <View className="bg-purple-500/20 px-3 py-2 rounded-lg min-w-[80px]">
-            <Text className="text-gray-400 text-xs">Có quốc tịch</Text>
-            <Text className="text-purple-400 font-bold text-sm">{stats.withNationality}</Text>
-          </View>
-          <View className="bg-emerald-500/20 px-3 py-2 rounded-lg min-w-[80px]">
-            <Text className="text-gray-400 text-xs">Có ngày sinh</Text>
-            <Text className="text-emerald-400 font-bold text-sm">{stats.withBirthDate}</Text>
           </View>
         </View>
       </View>

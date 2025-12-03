@@ -3,6 +3,8 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { BookPopulated } from "@shared-types/book.type";
 import type { CartItem } from "../api/cart.api";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 
 type Props = {
   book: BookPopulated;
@@ -19,14 +21,16 @@ export const CartItemCard = ({
   onDecrement,
   onRemove,
 }: Props) => {
+  const coverImageUrl = buildBookCoverUrl(book.cover_image);
+  const coverImage = validateImageUri(
+    coverImageUrl,
+    "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
+  );
+
   return (
     <View className="flex-row bg-neutral-900 rounded-2xl p-3 mb-3">
       <Image
-        source={{
-          uri:
-            book.cover_image ??
-            "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop",
-        }}
+        source={{ uri: coverImage }}
         className="w-20 h-28 rounded-xl mr-3"
       />
       <View className="flex-1 justify-between">

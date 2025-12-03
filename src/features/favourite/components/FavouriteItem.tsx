@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PopulatedFavourite } from "@shared-types/favourite.type";
 import { validateImageUri } from "@shared-utils/validate-image-uri";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
 
 // Helper function to format read count (e.g., 8000000 -> "8m")
 const formatReadCount = (count: number): string => {
@@ -24,8 +25,9 @@ export const FavouriteItem = ({
 }) => {
   const views = formatReadCount(favourite.summary.read_count);
 
+  const coverImageUrl = buildBookCoverUrl(favourite.summary.book.cover_image);
   const coverImage = validateImageUri(
-    favourite.summary.book.cover_image,
+    coverImageUrl,
     "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
   );
 

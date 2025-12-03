@@ -16,6 +16,8 @@ import { fetchOrderById, type Order, retryPayment, fetchOrderDetails, type Order
 import { fetchBookById } from "@features/book/api/book.api";
 import type { BookPopulated } from "@shared-types/book.type";
 import { Platform } from "react-native";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 import Toast from "react-native-toast-message";
 import type { HomeStackParamList } from "../navigation/HomeStack";
 
@@ -394,7 +396,11 @@ const OrderDetailScreen = () => {
                   : bookFromMap;
                 
                 const bookTitle = bookInfo?.title || `Sách #${item.book_id}`;
-                const bookImage = bookInfo?.cover_image || item.book?.cover_image;
+                const bookImageRaw = bookInfo?.cover_image || item.book?.cover_image;
+                const bookImage = validateImageUri(
+                  buildBookCoverUrl(bookImageRaw),
+                  "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
+                );
                 
                 // Handle authors - BookPopulated has authors array, item.book might have author string
                 let authorNames: string | null = null;

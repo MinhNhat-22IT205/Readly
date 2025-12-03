@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Comment, CommentPopulated } from "@shared-types/comment.type";
 import { SlideUpModal } from "@shared-components/SlideUpModal";
 import { createComment } from "../api/comment.api";
+import { validateImageUri } from "@shared-utils/validate-image-uri";
 
 interface SummaryCommentPopupProps {
   visible: boolean;
@@ -39,6 +40,29 @@ const SummaryCommentItem = ({
     minute: "2-digit",
   });
 
+  // Build profile image URI
+  const getProfileImageUri = () => {
+    if (!comment.user?.profile_image) {
+      return "https://via.placeholder.com/48";
+    }
+
+    const profileImage = comment.user.profile_image;
+    // Check if it's already an absolute URL
+    if (profileImage.startsWith("http://") || profileImage.startsWith("https://")) {
+      return profileImage;
+    }
+
+    // Build relative URL
+    const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || "";
+    const fullUrl = baseUrl + (profileImage.startsWith("/") ? profileImage : "/" + profileImage);
+    return fullUrl;
+  };
+
+  const avatarUri = validateImageUri(
+    getProfileImageUri(),
+    "https://via.placeholder.com/48"
+  );
+
   return (
     <View
       className={`bg-gray-800 rounded-xl p-4 mb-3 ${
@@ -47,21 +71,17 @@ const SummaryCommentItem = ({
     >
       <View className="flex-row items-start mb-3">
         <Image
-          source={{
-            uri:
-              process.env.EXPO_PUBLIC_API_BASE_URL +
-                comment.user.profile_image || "https://via.placeholder.com/48",
-          }}
+          source={{ uri: avatarUri }}
           className="w-10 h-10 rounded-full mr-3"
         />
-        <View className="flex-1">
-          <View className="flex-row items-center gap-2 flex-wrap">
-            <Text className="text-white font-semibold text-sm">
-              {comment.user.username}
-            </Text>
-            <Text className="text-gray-500 text-xs">{createdAt}</Text>
+          <View className="flex-1">
+            <View className="flex-row items-center gap-2 flex-wrap">
+              <Text className="text-white font-semibold text-sm">
+                {comment.user?.username || "Unknown"}
+              </Text>
+              <Text className="text-gray-500 text-xs">{createdAt}</Text>
+            </View>
           </View>
-        </View>
       </View>
 
       {comment.parent_comment && (

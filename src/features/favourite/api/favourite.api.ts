@@ -32,7 +32,8 @@ export const checkFavouriteStatus = async (
     );
     return response.data;
   } catch (error: any) {
-    if (error.response?.status === 404) {
+    // Handle both 404 (not found) and 422 (validation error - likely not authenticated or invalid request)
+    if (error.response?.status === 404 || error.response?.status === 422) {
       return null;
     }
     throw error;

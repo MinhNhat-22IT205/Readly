@@ -3,6 +3,7 @@ import { ScrollView, View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SummaryPopulated } from "@shared-types/summary.type";
 import { validateImageUri } from "@shared-utils/validate-image-uri";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
 
 interface AdminSummaryListProps {
   summaries: SummaryPopulated[];
@@ -45,7 +46,7 @@ export const AdminSummaryList = ({
           <View className="w-20 h-28 mr-4 rounded-xl overflow-hidden bg-gray-700 items-center justify-center">
             <Image
               source={{
-                uri: validateImageUri(summary.book?.cover_image),
+                uri: validateImageUri(buildBookCoverUrl(summary.book?.cover_image)),
               }}
               className="w-full h-full"
               resizeMode="cover"

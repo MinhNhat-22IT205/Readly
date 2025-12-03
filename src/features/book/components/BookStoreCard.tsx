@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image, Platform, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { BookPopulated } from "@shared-types/book.type";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
 import { validateImageUri } from "@shared-utils/validate-image-uri";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -18,8 +19,9 @@ export const BookStoreCard: React.FC<BookStoreCardProps> = ({
   onPress,
   onAddToCart,
 }) => {
+  const coverImageUrl = buildBookCoverUrl(book.cover_image);
   const coverImage = validateImageUri(
-    book.cover_image,
+    coverImageUrl,
     "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
   );
 

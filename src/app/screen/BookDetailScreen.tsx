@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AdminStackParamList } from "../navigation/AdminStack";
+import * as ImagePicker from "expo-image-picker";
 import type {
   BookPopulated,
   UpdateBookPayload,
@@ -37,6 +38,7 @@ import type { Category } from "@features/category/api/category.api";
 import Toast from "react-native-toast-message";
 import { UserFormField } from "@features/user/components/UserFormField";
 import { validateImageUri } from "@shared-utils/validate-image-uri";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const IS_DESKTOP = Platform.OS === "web" && SCREEN_WIDTH >= 768;
@@ -62,6 +64,8 @@ export default function BookDetailScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedCoverImageUri, setSelectedCoverImageUri] = useState<string | null>(null);
+  const [selectedCoverImageFile, setSelectedCoverImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     loadOptions();
@@ -166,21 +170,49 @@ export default function BookDetailScreen() {
 
     try {
       setIsSubmitting(true);
+      let updatedBook: BookPopulated;
+      
       if (isNewBook) {
-        await createBook(formData as CreateBookPayload);
+        updatedBook = await createBook(
+          formData as CreateBookPayload,
+          selectedCoverImageUri || undefined,
+          selectedCoverImageFile || undefined
+        );
         Toast.show({
           type: "success",
           text1: "Tạo thành công",
           text2: "Sách mới đã được tạo",
         });
       } else {
-        await updateBook(bookId, formData);
+        updatedBook = await updateBook(
+          bookId,
+          formData,
+          selectedCoverImageUri || undefined,
+          selectedCoverImageFile || undefined
+        );
         Toast.show({
           type: "success",
           text1: "Cập nhật thành công",
           text2: "Thông tin sách đã được cập nhật",
         });
+        
+        // Update book and formData with new cover image from server
+        setBook(updatedBook);
+        if (updatedBook.cover_image) {
+          setFormData({
+            ...formData,
+            cover_image: updatedBook.cover_image,
+          });
+        }
       }
+      
+      // Clear selected image after successful upload
+      if (selectedCoverImageUri && Platform.OS === "web") {
+        URL.revokeObjectURL(selectedCoverImageUri);
+      }
+      setSelectedCoverImageUri(null);
+      setSelectedCoverImageFile(null);
+      
       navigation.goBack();
     } catch (error: any) {
       console.error("Save book error:", error);
@@ -194,6 +226,68 @@ export default function BookDetailScreen() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const pickCoverImage = async () => {
+    if (Platform.OS === "web") {
+      // For web, create a file input
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = (e: any) => {
+        const file = e.target.files[0];
+        if (file) {
+          // Create a blob URL for preview
+          const blobUrl = URL.createObjectURL(file);
+          setSelectedCoverImageUri(blobUrl);
+          setSelectedCoverImageFile(file);
+          // Clear URL field when image is selected
+          setFormData({ ...formData, cover_image: null });
+        }
+      };
+      input.click();
+      return;
+    }
+
+    // For mobile (iOS/Android)
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Quyền truy cập",
+          "Cần quyền truy cập thư viện ảnh để chọn ảnh bìa sách."
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [3, 4], // Book cover aspect ratio
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setSelectedCoverImageUri(result.assets[0].uri);
+        // Clear URL field when image is selected
+        setFormData({ ...formData, cover_image: null });
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Toast.show({
+        type: "error",
+        text1: "Lỗi",
+        text2: "Không thể chọn ảnh",
+      });
+    }
+  };
+
+  const removeCoverImage = () => {
+    if (selectedCoverImageUri && Platform.OS === "web") {
+      URL.revokeObjectURL(selectedCoverImageUri);
+    }
+    setSelectedCoverImageUri(null);
+    setSelectedCoverImageFile(null);
   };
 
   const handleDelete = () => {
@@ -261,10 +355,61 @@ export default function BookDetailScreen() {
     );
   }
 
-  const coverImage = validateImageUri(
-    formData.cover_image || book?.cover_image,
-    "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
-  );
+  // Determine cover image to display
+  const getCoverImageUri = () => {
+    // Priority 1: Selected image (from picker) - can be blob: (web) or file:///content:// (mobile)
+    if (selectedCoverImageUri) {
+      return selectedCoverImageUri;
+    }
+    // Priority 2: URL from form data
+    if (formData.cover_image) {
+      // If it's already a full URL, use it directly
+      if (formData.cover_image.startsWith("http://") || formData.cover_image.startsWith("https://")) {
+        return formData.cover_image;
+      }
+      // Otherwise, build the full URL
+      const builtUrl = buildBookCoverUrl(formData.cover_image);
+      return builtUrl;
+    }
+    // Priority 3: URL from book data
+    if (book?.cover_image) {
+      const builtUrl = buildBookCoverUrl(book.cover_image);
+      return builtUrl;
+    }
+    return null;
+  };
+
+  const coverImageUri = getCoverImageUri();
+  
+  // For preview: use URI directly if it's a local file/blob, otherwise validate
+  let coverImage: string;
+  if (!coverImageUri) {
+    coverImage = "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop";
+  } else if (
+    coverImageUri.startsWith("blob:") || 
+    coverImageUri.startsWith("file://") || 
+    coverImageUri.startsWith("content://")
+  ) {
+    // Local file/blob - use directly
+    coverImage = coverImageUri;
+  } else {
+    // Remote URL - validate and use (this ensures proper URL format)
+    // validateImageUri will return the URL if valid, or fallback if invalid
+    coverImage = validateImageUri(coverImageUri);
+  }
+  
+  // Debug log
+  if (__DEV__) {
+    console.log("📸 Cover Image Debug:", {
+      selectedCoverImageUri,
+      formDataCoverImage: formData.cover_image,
+      bookCoverImage: book?.cover_image,
+      coverImageUri,
+      finalCoverImage: coverImage,
+      isWeb: Platform.OS === "web",
+      baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
+    });
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-900">
@@ -301,16 +446,67 @@ export default function BookDetailScreen() {
           contentContainerStyle={{ paddingBottom: 20 }}
           nestedScrollEnabled={true}
         >
-          {/* Cover Image */}
-          {coverImage && (
-            <View className="items-center py-6 border-b border-gray-800 bg-gray-800/30">
-              <Image
-                source={{ uri: coverImage }}
-                className="w-32 h-48 rounded-lg bg-gray-700"
-                resizeMode="cover"
-              />
+          {/* Cover Image Section */}
+          <View className={`items-center py-6 border-b border-gray-800 bg-gray-800/30 ${
+            IS_DESKTOP ? "max-w-4xl mx-auto w-full" : ""
+          }`}>
+            <View className={`relative mb-4 ${IS_DESKTOP ? "mb-6" : ""}`}>
+              {coverImage && coverImage !== "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop" ? (
+                <Image
+                  source={{ uri: coverImage }}
+                  className={`${IS_DESKTOP ? "w-48 h-72" : "w-32 h-48"} rounded-lg bg-gray-700`}
+                  resizeMode="cover"
+                  key={`cover-${selectedCoverImageUri || formData.cover_image || book?.cover_image || 'default'}`}
+                  onError={(error) => {
+                    console.error("❌ Image load error:", error.nativeEvent.error, "URL:", coverImage);
+                    // On web, log more details
+                    if (Platform.OS === "web" && __DEV__) {
+                      console.error("Image URL details:", {
+                        url: coverImage,
+                        isBlob: coverImage.startsWith("blob:"),
+                        isHttp: coverImage.startsWith("http"),
+                        error: error.nativeEvent.error
+                      });
+                    }
+                  }}
+                  onLoad={() => {
+                    if (__DEV__) {
+                      console.log("✅ Image loaded successfully:", coverImage);
+                    }
+                  }}
+                />
+              ) : (
+                <View className={`${IS_DESKTOP ? "w-48 h-72" : "w-32 h-48"} rounded-lg bg-gray-700 items-center justify-center`}>
+                  <Ionicons name="image-outline" size={IS_DESKTOP ? 64 : 48} color="#6B7280" />
+                  <Text className={`text-gray-500 ${IS_DESKTOP ? "text-sm" : "text-xs"} mt-2`}>Chưa có ảnh</Text>
+                </View>
+              )}
+              {selectedCoverImageUri && (
+                <TouchableOpacity
+                  onPress={removeCoverImage}
+                  className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1"
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="close-circle" size={IS_DESKTOP ? 24 : 20} color="#FFFFFF" />
+                </TouchableOpacity>
+              )}
             </View>
-          )}
+            <TouchableOpacity
+              onPress={pickCoverImage}
+              className={`bg-emerald-500 ${IS_DESKTOP ? "px-8 py-4" : "px-6 py-3"} rounded-xl flex-row items-center`}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="image-outline" size={IS_DESKTOP ? 24 : 20} color="#FFFFFF" />
+              <Text className={`text-white font-semibold ${IS_DESKTOP ? "ml-3 text-base" : "ml-2"}`}>
+                {selectedCoverImageUri ? "Chọn ảnh khác" : coverImage ? "Chọn ảnh khác" : "Chọn ảnh bìa sách"}
+              </Text>
+            </TouchableOpacity>
+            {selectedCoverImageUri && (
+              <Text className={`text-emerald-400 ${IS_DESKTOP ? "text-sm" : "text-xs"} mt-2`}>
+                ✓ Ảnh đã được chọn, nhấn "Lưu" để upload
+              </Text>
+            )}
+          </View>
 
           {/* Form Fields */}
           <View
@@ -491,18 +687,31 @@ export default function BookDetailScreen() {
               error={errors.publish_date}
             />
 
-            {/* Cover Image URL */}
-            <UserFormField
-              label="URL ảnh bìa"
-              value={formData.cover_image || ""}
-              onChange={(text) =>
-                setFormData({
-                  ...formData,
-                  cover_image: text.trim() === "" ? null : text,
-                })
-              }
-              placeholder="https://example.com/image.jpg"
-            />
+            {/* Cover Image URL (Alternative) */}
+            <View>
+              <View className="flex-row items-center mb-2">
+                <Text className="text-gray-300 text-sm font-medium">
+                  URL ảnh bìa (hoặc nhập link)
+                </Text>
+              </View>
+              <UserFormField
+                value={formData.cover_image || ""}
+                onChange={(text) => {
+                  setFormData({
+                    ...formData,
+                    cover_image: text.trim() === "" ? null : text,
+                  });
+                  // Clear selected image when URL is entered
+                  if (text.trim() !== "") {
+                    setSelectedCoverImageUri(null);
+                  }
+                }}
+                placeholder="https://example.com/image.jpg"
+              />
+              <Text className="text-gray-500 text-xs mt-1">
+                Hoặc sử dụng nút "Chọn ảnh bìa sách" ở trên để upload từ thiết bị
+              </Text>
+            </View>
           </View>
         </ScrollView>
 

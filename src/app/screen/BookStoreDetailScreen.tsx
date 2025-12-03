@@ -18,6 +18,7 @@ import { fetchBookById } from "@features/book/api/book.api";
 import type { BookPopulated } from "@shared-types/book.type";
 import { useCart } from "@features/cart/libs/useCart";
 import { validateImageUri } from "@shared-utils/validate-image-uri";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
 import Toast from "react-native-toast-message";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -153,8 +154,10 @@ export default function BookStoreDetailScreen() {
     );
   }
 
+  const { buildBookCoverUrl } = require("@shared-utils/build-book-cover-url");
+  const coverImageUrl = buildBookCoverUrl(book.cover_image);
   const coverImage = validateImageUri(
-    book.cover_image,
+    coverImageUrl,
     "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
   );
 

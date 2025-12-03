@@ -25,6 +25,7 @@ import { useFavourite } from "@features/favourite/hooks/useFavourite";
 import { useReadingHistory } from "@features/reading-history/hooks/useReadingHistory";
 import { useReadingProgress } from "@features/reading-history/hooks/useReadingProgress";
 import { useFetchCommentsBySummary } from "@features/comment/hooks/useFetchCommentsBySummary";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
 import { Ionicons } from "@expo/vector-icons";
 
 // Types
@@ -78,7 +79,7 @@ export default function SummaryDetailsScreen() {
 
   // Helper safely get
   const book = summary?.book;
-  const bookCoverUrl = book?.cover_image || "";
+  const bookCoverUrl = buildBookCoverUrl(book?.cover_image) || "";
   const bookTitle = book?.title || "";
   const bookAuthors =
     book?.authors && book.authors.length > 0

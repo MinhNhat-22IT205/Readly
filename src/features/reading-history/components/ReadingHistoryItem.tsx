@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ReadingHistoryPopulated } from "@shared-types/reading-history.type";
 import { validateImageUri } from "@shared-utils/validate-image-uri";
+import { buildBookCoverUrl } from "@shared-utils/build-book-cover-url";
 
 // Helper function to format read count (e.g., 8000000 -> "8m")
 const formatReadCount = (count: number): string => {
@@ -36,8 +37,9 @@ export const ReadingHistoryItem = ({
   const views = formatReadCount(readingHistory.summary.read_count);
   const timeSpent = formatTimeSpent(readingHistory.time_spent);
 
+  const coverImageUrl = buildBookCoverUrl(readingHistory.summary.book.cover_image);
   const coverImage = validateImageUri(
-    readingHistory.summary.book.cover_image,
+    coverImageUrl,
     "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop"
   );
 

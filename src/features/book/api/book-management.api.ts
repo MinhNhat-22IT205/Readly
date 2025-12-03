@@ -82,8 +82,68 @@ export const fetchBookById = async (bookId: string): Promise<BookPopulated> => {
  * Create new book
  */
 export const createBook = async (
-  payload: CreateBookPayload
+  payload: CreateBookPayload,
+  coverImageUri?: string,
+  coverImageFile?: File
 ): Promise<BookPopulated> => {
+  // If coverImageUri or coverImageFile is provided, use FormData for file upload
+  if (coverImageUri || coverImageFile) {
+    const formData = new FormData();
+    
+    // Add text fields
+    formData.append("title", payload.title);
+    if (payload.publisher_id !== undefined && payload.publisher_id !== null) {
+      formData.append("publisher_id", payload.publisher_id.toString());
+    }
+    if (payload.publish_date) {
+      formData.append("publish_date", payload.publish_date);
+    }
+    formData.append("price", payload.price.toString());
+    formData.append("stock_quantity", payload.stock_quantity.toString());
+    
+    if (payload.author_ids && payload.author_ids.length > 0) {
+      payload.author_ids.forEach((id) => {
+        formData.append("author_ids", id.toString());
+      });
+    }
+    if (payload.category_ids && payload.category_ids.length > 0) {
+      payload.category_ids.forEach((id) => {
+        formData.append("category_ids", id.toString());
+      });
+    }
+    
+    // Add image file
+    const uriParts = coverImageUri.split("/");
+    const filename = uriParts[uriParts.length - 1] || "cover.jpg";
+    const extension = filename.split(".").pop()?.toLowerCase() || "jpg";
+    const mimeTypes: Record<string, string> = {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      gif: "image/gif",
+      webp: "image/webp",
+    };
+    const type = mimeTypes[extension] || "image/jpeg";
+    
+    formData.append("cover_image", {
+      uri: coverImageUri,
+      type,
+      name: filename,
+    } as any);
+    
+    const response = await axiosInstance.post<BookPopulated>(
+      BOOKS_ENDPOINT,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  }
+  
+  // Otherwise, use JSON payload
   const response = await axiosInstance.post<BookPopulated>(
     BOOKS_ENDPOINT,
     payload
@@ -96,8 +156,90 @@ export const createBook = async (
  */
 export const updateBook = async (
   bookId: string,
-  payload: UpdateBookPayload
+  payload: UpdateBookPayload,
+  coverImageUri?: string,
+  coverImageFile?: File
 ): Promise<BookPopulated> => {
+  // If coverImageUri or coverImageFile is provided, use FormData for file upload
+  if (coverImageUri || coverImageFile) {
+    const formData = new FormData();
+    
+    // Add text fields
+    if (payload.title !== undefined) {
+      formData.append("title", payload.title);
+    }
+    if (payload.publisher_id !== undefined) {
+      if (payload.publisher_id !== null) {
+        formData.append("publisher_id", payload.publisher_id.toString());
+      } else {
+        formData.append("publisher_id", "");
+      }
+    }
+    if (payload.publish_date !== undefined) {
+      if (payload.publish_date) {
+        formData.append("publish_date", payload.publish_date);
+      } else {
+        formData.append("publish_date", "");
+      }
+    }
+    if (payload.price !== undefined) {
+      formData.append("price", payload.price.toString());
+    }
+    if (payload.stock_quantity !== undefined) {
+      formData.append("stock_quantity", payload.stock_quantity.toString());
+    }
+    
+    if (payload.author_ids !== undefined) {
+      if (payload.author_ids.length > 0) {
+        payload.author_ids.forEach((id) => {
+          formData.append("author_ids", id.toString());
+        });
+      }
+    }
+    if (payload.category_ids !== undefined) {
+      if (payload.category_ids.length > 0) {
+        payload.category_ids.forEach((id) => {
+          formData.append("category_ids", id.toString());
+        });
+      }
+    }
+    
+    // Add image file - prefer File object (web), otherwise use URI (mobile)
+    if (coverImageFile) {
+      formData.append("cover_image", coverImageFile);
+    } else if (coverImageUri) {
+      const uriParts = coverImageUri.split("/");
+      const filename = uriParts[uriParts.length - 1] || "cover.jpg";
+      const extension = filename.split(".").pop()?.toLowerCase() || "jpg";
+      const mimeTypes: Record<string, string> = {
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        gif: "image/gif",
+        webp: "image/webp",
+      };
+      const type = mimeTypes[extension] || "image/jpeg";
+      
+      formData.append("cover_image", {
+        uri: coverImageUri,
+        type,
+        name: filename,
+      } as any);
+    }
+    
+    const response = await axiosInstance.patch<BookPopulated>(
+      `${BOOKS_ENDPOINT}${bookId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  }
+  
+  // Otherwise, use JSON payload
   const response = await axiosInstance.patch<BookPopulated>(
     `${BOOKS_ENDPOINT}${bookId}`,
     payload
