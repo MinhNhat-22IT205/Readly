@@ -84,3 +84,6 @@ export const deletePublisher = async (publisherId: string): Promise<void> => {
   await axiosInstance.delete(`${PUBLISHERS_ENDPOINT}${publisherId}`);
 };
 
+
+
+

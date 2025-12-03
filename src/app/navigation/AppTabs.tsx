@@ -6,6 +6,7 @@ import { Image } from "react-native";
 import HomeStack from "./HomeStack";
 import WriterStack from "./WriterStack";
 import AdminStack from "./AdminStack";
+import ExploreStack from "./ExploreStack";
 import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import ProfileStack from "./ProfileStack";
 import { validateImageUri } from "@shared-utils/validate-image-uri";
@@ -62,7 +63,7 @@ export default function AppTabs() {
       })}
     >
       <Tab.Screen name="Home" component={HomeStack} />
-      <Tab.Screen name="Explore" component={LoginScreen} />
+      <Tab.Screen name="Explore" component={ExploreStack} />
       {isWriter && <Tab.Screen name="Writer" component={WriterStack} />}
       {isAdmin && <Tab.Screen name="Admin" component={AdminStack} />}
       <Tab.Screen name="Profile" component={ProfileStack} />

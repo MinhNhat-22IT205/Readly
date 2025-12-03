@@ -15,9 +15,15 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCart } from "@features/cart/libs/useCart";
 import { useBookCatalog } from "@features/book/libs/useBookCatalog";
-import { checkoutSchema, CheckoutFormValues } from "@features/order/libs/checkoutForm.zod";
+import {
+  checkoutSchema,
+  CheckoutFormValues,
+} from "@features/order/libs/checkoutForm.zod";
 import { OrderSummaryCard } from "@features/order/components/OrderSummaryCard";
-import { submitOrder, createPaymentSession } from "@features/order/api/order.api";
+import {
+  submitOrder,
+  createPaymentSession,
+} from "@features/order/api/order.api";
 import { Linking, Platform } from "react-native";
 import type { HomeStackParamList } from "../navigation/HomeStack";
 
@@ -112,7 +118,10 @@ const CheckoutScreen = () => {
         paymentMethod: values.paymentMethod,
       });
 
-      console.log("✅ Order created:", { orderId: order.id, totalAmount: order.total_amount });
+      console.log("✅ Order created:", {
+        orderId: order.id,
+        totalAmount: order.total_amount,
+      });
 
       // Xóa giỏ hàng ngay sau khi đơn hàng được tạo thành công (đã chuyển sang đang xử lý)
       await clearCart();
@@ -177,6 +186,20 @@ const CheckoutScreen = () => {
       let showRetry = true;
 
       if (errorData) {
+        // Hết hàng / không đủ tồn kho khi tạo order details
+        if (
+          statusCode === 400 &&
+          (errorData.detail === "Not enough stock for this book" ||
+            errorData.detail === "Not enough stock")
+        ) {
+          errorTitle = "Không đủ hàng";
+          errorMessage =
+            errorData.detail === "Not enough stock for this book"
+              ? "Không đủ số lượng sách trong kho cho một sản phẩm trong giỏ."
+              : "Không đủ số lượng sách trong kho.";
+          showRetry = false;
+        }
+
         // Backend trả về: { detail: { error: "..." } } hoặc { detail: { payos_error: "..." } }
         if (errorData.detail?.error) {
           const payosError = errorData.detail.error;

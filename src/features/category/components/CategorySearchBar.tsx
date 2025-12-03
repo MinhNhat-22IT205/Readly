@@ -35,3 +35,6 @@ export const CategorySearchBar: React.FC<CategorySearchBarProps> = ({
   );
 };
 
+
+
+

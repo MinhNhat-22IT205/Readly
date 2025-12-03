@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -7,7 +13,6 @@ import { HomeStackParamList } from "../navigation/HomeStack";
 import { SummaryCommentPopup } from "../../features/comment/components/SummaryCommentPopup";
 import { ContentDropdown } from "../../features/summary/components/ContentDropdown";
 import { SummaryHeroSection } from "../../features/summary/components/SummaryHeroSection";
-import { SummaryActionButtons } from "../../features/summary/components/SummaryActionButtons";
 import { SummaryTitleSection } from "../../features/summary/components/SummaryTitleSection";
 import { SummaryStats } from "../../features/summary/components/SummaryStats";
 import { SummaryReadingProgress } from "../../features/summary/components/SummaryReadingProgress";
@@ -20,6 +25,7 @@ import { useFavourite } from "@features/favourite/hooks/useFavourite";
 import { useReadingHistory } from "@features/reading-history/hooks/useReadingHistory";
 import { useReadingProgress } from "@features/reading-history/hooks/useReadingProgress";
 import { useFetchCommentsBySummary } from "@features/comment/hooks/useFetchCommentsBySummary";
+import { Ionicons } from "@expo/vector-icons";
 
 // Types
 type SummaryDetailsScreenRouteProp = RouteProp<
@@ -84,6 +90,28 @@ export default function SummaryDetailsScreen() {
     (c) => c.access === "public"
   ).length;
 
+  const handleOpenBookDetail = () => {
+    const bookId =
+      summary?.book?.id ?? (summary?.book_id ? Number(summary.book_id) : null);
+
+    if (!bookId) return;
+
+    const bookIdStr = String(bookId);
+
+    // Luôn dùng parent navigator (bottom tabs) để điều hướng tới HomeStack.BookStoreDetail
+    const parentNav = (navigation as any)?.getParent?.();
+    if (parentNav?.navigate) {
+      parentNav.navigate("Home", {
+        screen: "BookStoreDetail",
+        params: { bookId: bookIdStr },
+      });
+      return;
+    }
+
+    // Fallback: nếu không có parent (hiếm), thử điều hướng trực tiếp trong stack hiện tại
+    (navigation as any)?.navigate?.("BookStoreDetail", { bookId: bookIdStr });
+  };
+
   if (isSummaryLoading || isSectionsLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-gray-900">
@@ -111,8 +139,6 @@ export default function SummaryDetailsScreen() {
           onToggleFavourite={toggleFavourite}
         />
 
-        <SummaryActionButtons />
-
         <SummaryTitleSection
           bookTitle={bookTitle}
           bookAuthors={bookAuthors}
@@ -125,6 +151,22 @@ export default function SummaryDetailsScreen() {
           categories={book?.categories}
           publisher={book?.publisher}
         />
+
+        {/* Nút mua sách (đi tới trang BookStoreDetail) */}
+        {book && (
+          <View className="px-4 mt-4">
+            <TouchableOpacity
+              onPress={handleOpenBookDetail}
+              className="bg-emerald-500 py-3 rounded-xl flex-row items-center justify-center active:bg-emerald-600"
+              activeOpacity={0.85}
+            >
+              <Ionicons name="book-outline" size={20} color="#ffffff" />
+              <Text className="text-white font-semibold text-base ml-2">
+                Mua sách
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {history && <SummaryReadingProgress history={history} />}
 

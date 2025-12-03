@@ -84,3 +84,6 @@ export const deleteCategory = async (categoryId: string): Promise<void> => {
   await axiosInstance.delete(`${CATEGORIES_ENDPOINT}${categoryId}`);
 };
 
+
+
+

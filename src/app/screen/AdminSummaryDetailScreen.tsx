@@ -154,18 +154,6 @@ export default function AdminSummaryDetailScreen() {
           </View>
         </View>
 
-        {/* Action Buttons */}
-        <View className="flex-row mx-4 mt-6 gap-2">
-          <TouchableOpacity className="flex-1 bg-gray-800 py-3 rounded-lg flex-row items-center justify-center">
-            <Ionicons name="book-outline" size={20} color="white" />
-            <Text className="text-white ml-2 font-semibold">Read Nexus</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-1 bg-gray-800 py-3 rounded-lg flex-row items-center justify-center">
-            <Ionicons name="headset-outline" size={20} color="white" />
-            <Text className="text-white ml-2 font-semibold">Play Nexus</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Title Section + Admin menu button */}
         <View className="px-4 mt-6 flex-row items-start justify-between">
           <View className="flex-1 mr-3">
@@ -183,11 +171,7 @@ export default function AdminSummaryDetailScreen() {
         </View>
 
         {/* Stats */}
-        <View className="flex-row px-4 mt-4 gap-8">
-          <View className="flex-row items-center">
-            <Ionicons name="time-outline" size={18} color="#9CA3AF" />
-            <Text className="text-gray-400 ml-2">18 min</Text>
-          </View>
+        <View className="flex-row px-4 mt-4">
           <View className="flex-row items-center">
             <Ionicons name="bulb-outline" size={18} color="#9CA3AF" />
             <Text className="text-gray-400 ml-2">
