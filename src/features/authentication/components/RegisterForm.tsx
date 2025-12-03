@@ -6,6 +6,10 @@ import { zRegisterInputs, ztRegisterInputs } from '../libs/register.zod';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '@app/navigation/AppNavigator';
+import { register } from '../api/auth.api';
+import type { ServerError } from '@shared-types/server-error.type';
+import { isServerError } from '@shared-utils/is-server-error';
+import Toast from 'react-native-toast-message';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -19,12 +23,47 @@ export default function RegisterForm() {
   });
 
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = (data: ztRegisterInputs) => {
-    console.log("Sign Up Data:", data);
-    // TODO: call your API or signup logic
-    // After successful signup, redirect to Login
-    navigation.replace('Login');
+  const onSubmit = async (data: ztRegisterInputs) => {
+    setApiError(null);
+    setIsSubmitting(true);
+
+    try {
+      const result = await register(data);
+
+      if (isServerError(result as any)) {
+        const errorMessage = (result as ServerError).message ?? 'Unable to complete registration.';
+        setApiError(errorMessage);
+        Toast.show({
+          type: 'error',
+          text1: 'Registration Failed',
+          text2: errorMessage,
+        });
+        return;
+      }
+
+      // Registration successful
+      Toast.show({
+        type: 'success',
+        text1: 'Registration Successful',
+        text2: 'Your account has been created. Please log in.',
+      });
+
+      // Navigate to Login screen after successful registration
+      navigation.replace('Login');
+    } catch (error) {
+      const errorMessage = 'Something went wrong. Please try again.';
+      setApiError(errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: errorMessage,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -104,12 +143,20 @@ export default function RegisterForm() {
           <Text className="font-bold"> Terms of Service & Privacy Policy</Text>
         </Text>
 
+        {/* API Error Message */}
+        {apiError && (
+          <Text className="text-red-500 text-center mb-3">{apiError}</Text>
+        )}
+
         {/* Submit Button */}
         <TouchableOpacity
           className="bg-green-200 rounded-md py-3 mb-2"
           onPress={handleSubmit(onSubmit)}
+          disabled={isSubmitting}
         >
-          <Text className="text-neutral-900 text-center font-semibold">Create Account</Text>
+          <Text className="text-neutral-900 text-center font-semibold">
+            {isSubmitting ? 'Creating Account...' : 'Create Account'}
+          </Text>
         </TouchableOpacity>
 
         {/* Redirect to Login */}

@@ -102,6 +102,81 @@ export const fetchOrderById = async (
   return response.data;
 };
 
+// Order Detail (Order Item) type
+export type OrderDetail = {
+  id: number;
+  order_id: number;
+  book_id: number;
+  quantity: number;
+  price: number;
+  book?: {
+    id: number;
+    title: string;
+    author?: string;
+    cover_image?: string;
+    price?: number;
+  };
+};
+
+// Fetch order details (items) for an order
+export const fetchOrderDetails = async (
+  orderId: string | number
+): Promise<OrderDetail[]> => {
+  const orderIdNum = Number(orderId);
+  
+  try {
+    // Try endpoint with order_id in path
+    try {
+      const response = await axiosInstance.get<OrderDetail[]>(
+        `${ORDERS_ENDPOINT}${orderId}/details`
+      );
+      // Filter to ensure only items for this order
+      const filtered = (response.data || []).filter(
+        (item) => item.order_id === orderIdNum
+      );
+      console.log(`✅ Fetched ${filtered.length} items for order ${orderId}`);
+      return filtered;
+    } catch (pathError: any) {
+      // If path-based endpoint fails, try query param
+      if (pathError?.response?.status === 404 || pathError?.response?.status === 400) {
+        const response = await axiosInstance.get<OrderDetail[]>(
+          `${ORDER_DETAILS_ENDPOINT}?order_id=${orderId}`
+        );
+        // Filter to ensure only items for this order
+        const filtered = (response.data || []).filter(
+          (item) => item.order_id === orderIdNum
+        );
+        console.log(`✅ Fetched ${filtered.length} items for order ${orderId} (query param)`);
+        return filtered;
+      }
+      throw pathError;
+    }
+  } catch (error: any) {
+    console.error("Error fetching order details:", error);
+    
+    // Last resort: fetch all and filter client-side (not ideal but works)
+    if (error?.response?.status === 404 || error?.response?.status === 400) {
+      try {
+        console.log("⚠️ Trying to fetch all order details and filter client-side...");
+        const allResponse = await axiosInstance.get<OrderDetail[]>(
+          ORDER_DETAILS_ENDPOINT
+        );
+        // Filter by order_id on client side
+        const filtered = (allResponse.data || []).filter(
+          (item) => item.order_id === orderIdNum
+        );
+        console.log(`✅ Filtered ${filtered.length} items for order ${orderId} from all orders`);
+        return filtered;
+      } catch (fallbackError) {
+        console.error("Fallback fetch also failed:", fallbackError);
+        return [];
+      }
+    }
+    
+    return [];
+  }
+};
+
 export const fetchAdminOrderById = async (
   orderId: string | number
 ): Promise<Order> => {
@@ -177,6 +252,40 @@ export const createPaymentSession = async (
       statusText: error?.response?.statusText,
       data: error?.response?.data,
       detail: error?.response?.data?.detail,
+    });
+    throw error;
+  }
+};
+
+// Retry payment for existing order (PENDING or FAILED)
+export const retryPayment = async (
+  orderId: number
+): Promise<PaymentSessionResponse> => {
+  try {
+    console.log("🔄 Retrying payment for order:", { order_id: orderId });
+    
+    // First, verify the order exists and is eligible for retry
+    const order = await fetchOrderById(orderId);
+    
+    if (order.payment_status === "completed") {
+      throw new Error("Order has already been paid");
+    }
+
+    // Create new payment session
+    const sessionResponse = await createPaymentSession(orderId);
+    
+    console.log("✅ Retry payment session created:", {
+      orderId,
+      hasCheckoutUrl: !!sessionResponse?.checkoutUrl,
+    });
+    
+    return sessionResponse;
+  } catch (error: any) {
+    console.error("❌ Retry payment error:", {
+      orderId,
+      error: error?.message || error,
+      status: error?.response?.status,
+      data: error?.response?.data,
     });
     throw error;
   }

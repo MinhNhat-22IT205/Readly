@@ -9,6 +9,7 @@ import CheckoutScreen from "@app/screen/CheckoutScreen";
 import OrderResultScreen from "@app/screen/OrderResultScreen";
 import PayOSPaymentScreen from "@app/screen/PayOSPaymentScreen";
 import OrderManagementScreen from "@app/screen/OrderManagementScreen";
+import OrderDetailScreen from "@app/screen/OrderDetailScreen";
 
 export type HomeStackParamList = {
   Home: undefined;
@@ -20,6 +21,7 @@ export type HomeStackParamList = {
   PayOSPayment: { checkoutUrl: string; orderId: number };
   OrderResult: { orderId: number };
   OrderManagement: undefined;
+  OrderDetail: { orderId: number; orderData?: any };
 };
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -36,6 +38,7 @@ export default function HomeStack() {
       <Stack.Screen name="PayOSPayment" component={PayOSPaymentScreen} />
       <Stack.Screen name="OrderResult" component={OrderResultScreen} />
       <Stack.Screen name="OrderManagement" component={OrderManagementScreen} />
+      <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
     </Stack.Navigator>
   );
 }

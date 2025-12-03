@@ -24,6 +24,11 @@ type LoginScreenNavigationProp = NativeStackNavigationProp<
 >;
 
 export default function LoginForm() {
+  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const { setEndUser, setToken } = useAuthStore((state) => state);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -32,16 +37,13 @@ export default function LoginForm() {
     resolver: zodResolver(zLoginInputs),
     defaultValues: { email: "", password: "" },
   });
-  const navigation = useNavigation<LoginScreenNavigationProp>();
-  const { setEndUser, setToken } = useAuthStore((state) => state);
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onLogin = async (data: ztLoginInputs) => {
     setApiError(null);
     setIsSubmitting(true);
 
     try {
+      // Normal login flow
       const result = await login(data);
 
       if (isServerError(result as any)) {
@@ -140,6 +142,14 @@ export default function LoginForm() {
       {apiError && (
         <Text className="text-red-500 text-center mb-3">{apiError}</Text>
       )}
+
+      {/* Login with OTP Option */}
+      <View className="flex-row justify-center mb-3">
+        <Text className="text-neutral-400">Prefer OTP login? </Text>
+        <Pressable onPress={() => navigation.navigate("LoginWithOTP")}>
+          <Text className="text-green-200 font-semibold">Login with OTP</Text>
+        </Pressable>
+      </View>
 
       {/* Forgot Password */}
       <Pressable>

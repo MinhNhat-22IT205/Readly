@@ -4,7 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { fetchOrderById, type Order } from "@features/order/api/order.api";
+import { fetchOrderById, type Order, retryPayment } from "@features/order/api/order.api";
+import { Platform, Alert } from "react-native";
+import Toast from "react-native-toast-message";
 import { useCart } from "@features/cart/libs/useCart";
 import type { HomeStackParamList } from "../navigation/HomeStack";
 
@@ -25,6 +27,7 @@ const OrderResultScreen = () => {
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRetryingPayment, setIsRetryingPayment] = useState(false);
   const pollCountRef = useRef(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isPollingStoppedRef = useRef(false);
@@ -118,6 +121,52 @@ const OrderResultScreen = () => {
 
   const statusInfo = getStatusInfo();
 
+  // Check if order can retry payment
+  const canRetryPayment = order && 
+    (order.payment_status === "pending" || order.payment_status === "failed") &&
+    order.payment_method !== "cod";
+
+  const handleRetryPayment = async () => {
+    if (!order || isRetryingPayment) return;
+
+    try {
+      setIsRetryingPayment(true);
+      
+      // Create payment session
+      const sessionResponse = await retryPayment(order.id);
+      const checkoutUrl = sessionResponse.checkoutUrl;
+
+      if (!checkoutUrl) {
+        throw new Error("Không nhận được checkout URL từ PayOS");
+      }
+
+      // Navigate to PayOS payment screen
+      if (Platform.OS === "web") {
+        window.location.href = checkoutUrl;
+      } else {
+        navigation.navigate("PayOSPayment", {
+          checkoutUrl,
+          orderId: order.id,
+        });
+      }
+    } catch (error: any) {
+      console.error("Retry payment error:", error);
+      const errorMessage =
+        error?.response?.data?.detail ||
+        error?.message ||
+        "Không thể tạo lại phiên thanh toán. Vui lòng thử lại.";
+      
+      Alert.alert("Lỗi", errorMessage);
+      Toast.show({
+        type: "error",
+        text1: "Thanh toán lại thất bại",
+        text2: errorMessage,
+      });
+    } finally {
+      setIsRetryingPayment(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-neutral-950">
       <View className="flex-row items-center justify-between px-4 py-3">
@@ -180,6 +229,19 @@ const OrderResultScreen = () => {
                   </Text>
                 </View>
               </View>
+            )}
+
+            {/* Retry Payment Button - Show for pending/failed orders (not COD) */}
+            {canRetryPayment && (
+              <TouchableOpacity
+                className="bg-emerald-500 rounded-full px-8 py-3 w-full mb-3"
+                onPress={handleRetryPayment}
+                disabled={isRetryingPayment}
+              >
+                <Text className="text-center text-black font-semibold text-lg">
+                  {isRetryingPayment ? "Đang xử lý..." : "Thanh toán lại"}
+                </Text>
+              </TouchableOpacity>
             )}
 
             <TouchableOpacity

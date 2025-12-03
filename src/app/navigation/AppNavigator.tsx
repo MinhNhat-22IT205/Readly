@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { LoginScreen } from "@app/screen/LoginScreen";
 import { RegisterScreen } from "@app/screen/RegisterScreen";
 import { ForgotPasswordScreen } from "@app/screen/RecoverPasswordScreen";
+import { OTPVerificationScreen } from "@app/screen/OTPVerificationScreen";
+import { LoginWithOTPScreen } from "@app/screen/LoginWithOTPScreen";
 import { useAuthStore } from "@shared-libs/zustand/auth.zustand";
 import AppTabs from "./AppTabs";
 import { getCurrentUser } from "@features/authentication/api/auth.api";
@@ -14,8 +16,10 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export type RootStackParamList = {
   Login: undefined;
+  LoginWithOTP: undefined;
   Register: undefined;
   ForgotPassword: undefined;
+  OTPVerification: { email: string };
   Home: undefined; // This is where user goes after login
 };
 
@@ -112,10 +116,15 @@ export default function AppNavigator() {
           screenOptions={{ headerShown: false }}
         >
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="LoginWithOTP" component={LoginWithOTPScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen
             name="ForgotPassword"
             component={ForgotPasswordScreen}
+          />
+          <Stack.Screen
+            name="OTPVerification"
+            component={OTPVerificationScreen}
           />
         </Stack.Navigator>
       )}

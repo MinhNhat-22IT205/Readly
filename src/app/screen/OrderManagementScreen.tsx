@@ -11,7 +11,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { fetchOrders, type Order } from "@features/order/api/order.api";
+import { fetchOrders, type Order, retryPayment } from "@features/order/api/order.api";
+import { Platform, Alert } from "react-native";
+import Toast from "react-native-toast-message";
 import type { HomeStackParamList } from "../navigation/HomeStack";
 
 type NavigationProp = NativeStackNavigationProp<
@@ -24,6 +26,7 @@ const OrderManagementScreen = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [processingOrderId, setProcessingOrderId] = useState<number | null>(null);
 
   const loadOrders = async () => {
     try {
@@ -141,6 +144,55 @@ const OrderManagementScreen = () => {
     }).format(amount);
   };
 
+  // Check if order can retry payment (pending or failed, and not COD)
+  const canRetryPayment = (order: Order) => {
+    return (
+      (order.payment_status === "pending" || order.payment_status === "failed") &&
+      order.payment_method !== "cod"
+    );
+  };
+
+  const handleRetryPayment = async (order: Order) => {
+    if (processingOrderId === order.id) return;
+
+    try {
+      setProcessingOrderId(order.id);
+      
+      // Create payment session
+      const sessionResponse = await retryPayment(order.id);
+      const checkoutUrl = sessionResponse.checkoutUrl;
+
+      if (!checkoutUrl) {
+        throw new Error("Không nhận được checkout URL từ PayOS");
+      }
+
+      // Navigate to PayOS payment screen
+      if (Platform.OS === "web") {
+        window.location.href = checkoutUrl;
+      } else {
+        navigation.navigate("PayOSPayment", {
+          checkoutUrl,
+          orderId: order.id,
+        });
+      }
+    } catch (error: any) {
+      console.error("Retry payment error:", error);
+      const errorMessage =
+        error?.response?.data?.detail ||
+        error?.message ||
+        "Không thể tạo lại phiên thanh toán. Vui lòng thử lại.";
+      
+      Alert.alert("Lỗi", errorMessage);
+      Toast.show({
+        type: "error",
+        text1: "Thanh toán lại thất bại",
+        text2: errorMessage,
+      });
+    } finally {
+      setProcessingOrderId(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 bg-neutral-950">
@@ -213,8 +265,11 @@ const OrderManagementScreen = () => {
                 key={order.id}
                 className="bg-neutral-900 rounded-2xl p-4 mb-4"
                 onPress={() => {
-                  // Có thể navigate đến chi tiết đơn hàng nếu cần
-                  navigation.navigate("OrderResult", { orderId: order.id });
+                  // Navigate to order detail with order data to avoid 404
+                  navigation.navigate("OrderDetail", { 
+                    orderId: order.id,
+                    orderData: order // Pass order data to avoid 404
+                  });
                 }}
               >
                 <View className="flex-row justify-between items-start mb-3">
@@ -291,6 +346,32 @@ const OrderManagementScreen = () => {
                       </Text>
                     )}
                   </View>
+                )}
+
+                {/* Retry Payment Button */}
+                {canRetryPayment(order) && (
+                  <TouchableOpacity
+                    className="mt-3 pt-3 border-t border-neutral-800"
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleRetryPayment(order);
+                    }}
+                    disabled={processingOrderId === order.id}
+                  >
+                    <View className="flex-row items-center justify-center bg-emerald-500 rounded-lg py-2 px-4">
+                      <Ionicons
+                        name="card-outline"
+                        size={18}
+                        color="#000"
+                        style={{ marginRight: 8 }}
+                      />
+                      <Text className="text-black font-semibold">
+                        {processingOrderId === order.id
+                          ? "Đang xử lý..."
+                          : "Thanh toán lại"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
                 )}
               </TouchableOpacity>
             );
