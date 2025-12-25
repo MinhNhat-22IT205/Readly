@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,8 @@ import {
   Image,
   ActivityIndicator,
   Alert,
-} from "react-native";
+  Platform,
+  } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -32,6 +33,8 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
+  // For web: store the File object
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     username: endUser.username || "",
     email: endUser.email || "",
@@ -42,11 +45,21 @@ export default function ProfileScreen() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      console.log("💾 Saving profile:", {
+        hasImage: !!selectedImageUri || !!selectedImageFile,
+        imageUri: selectedImageUri?.substring(0, 50) + "...",
+        hasFile: !!selectedImageFile,
+        platform: Platform.OS,
+      });
+
       const result = await updateProfile(
         formData,
-        selectedImageUri || undefined
+        selectedImageUri || undefined,
+        selectedImageFile || undefined
       );
+
       if (isServerError(result)) {
+        console.error("❌ Profile update failed:", result);
         Toast.show({
           type: "error",
           text1: "Error",
@@ -54,19 +67,30 @@ export default function ProfileScreen() {
         });
         return;
       }
+
+      console.log("✅ Profile updated:", {
+        profile_image: result.profile_image,
+      });
+
       setEndUser(result);
+      // Cleanup blob URL before clearing state
+      if (selectedImageUri && selectedImageUri.startsWith("blob:")) {
+        URL.revokeObjectURL(selectedImageUri);
+      }
       setSelectedImageUri(null);
+      setSelectedImageFile(null);
       setIsEditing(false);
       Toast.show({
         type: "success",
         text1: "Success",
         text2: "Profile updated successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("❌ Profile save error:", error);
       Toast.show({
         type: "error",
         text1: "Error",
-        text2: "Failed to update profile",
+        text2: error?.message || "Failed to update profile",
       });
     } finally {
       setIsSaving(false);
@@ -80,39 +104,130 @@ export default function ProfileScreen() {
       phone: endUser.phone || "",
       bio: endUser.bio || "",
     });
+    // Cleanup blob URL before clearing state
+    if (selectedImageUri && selectedImageUri.startsWith("blob:")) {
+      URL.revokeObjectURL(selectedImageUri);
+    }
     setSelectedImageUri(null);
+    setSelectedImageFile(null);
     setIsEditing(false);
   };
 
   const pickImage = async () => {
-    // Request permissions
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission Required",
-        "We need access to your photos to set a profile picture."
-      );
-      return;
-    }
+    try {
+      // Web platform: use file input
+      if (Platform.OS === "web") {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.style.display = "none";
 
-    // Launch image picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
+        input.onchange = (e: Event) => {
+          const target = e.target as HTMLInputElement;
+          const file = target.files?.[0];
+          if (file) {
+            console.log("📸 Image selected (web):", {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+            });
 
-    if (!result.canceled && result.assets[0]) {
-      setSelectedImageUri(result.assets[0].uri);
+            // Create blob URL for preview
+            const blobUrl = URL.createObjectURL(file);
+            setSelectedImageUri(blobUrl);
+            setSelectedImageFile(file);
+          }
+        };
+
+        document.body.appendChild(input);
+        input.click();
+        document.body.removeChild(input);
+        return;
+      }
+
+      // Mobile platform: use expo-image-picker
+      // Request permissions
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "We need access to your photos to set a profile picture."
+        );
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        console.log("📸 Image selected (mobile):", {
+          uri: result.assets[0].uri.substring(0, 50) + "...",
+          width: result.assets[0].width,
+          height: result.assets[0].height,
+        });
+        setSelectedImageUri(result.assets[0].uri);
+        setSelectedImageFile(null); // Mobile doesn't use File object
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to pick image",
+      });
     }
   };
-  const avatarUriRaw =
-    selectedImageUri ||
-    (endUser.profile_image
-      ? process.env.EXPO_PUBLIC_API_BASE_URL + endUser.profile_image
-      : DUMMY_AVATAR);
-  const avatarUri = validateImageUri(avatarUriRaw, DUMMY_AVATAR);
+
+  // Determine avatar URI to display
+  const getAvatarUri = () => {
+    // Priority 1: Selected image (from picker)
+    if (selectedImageUri) {
+      // For blob URLs (web), use directly
+      if (selectedImageUri.startsWith("blob:")) {
+        return selectedImageUri;
+      }
+      // For local file URIs (mobile), use directly without validation
+      if (
+        selectedImageUri.startsWith("file://") ||
+        selectedImageUri.startsWith("content://")
+      ) {
+        return selectedImageUri;
+      }
+      // For other URIs, validate
+      return validateImageUri(selectedImageUri, DUMMY_AVATAR);
+    }
+    // Priority 2: User's profile image from backend (relative path)
+    if (endUser.profile_image) {
+      // Build full URL from relative path
+      const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || "";
+      if (baseUrl) {
+        const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+        const cleanPath = endUser.profile_image.startsWith("/") 
+          ? endUser.profile_image 
+          : "/" + endUser.profile_image;
+        return cleanBaseUrl + cleanPath;
+      }
+    }
+    // Priority 3: Default avatar
+    return DUMMY_AVATAR;
+  };
+
+  const avatarUri = getAvatarUri();
+
+  // Cleanup blob URLs when component unmounts or when saving/canceling
+  useEffect(() => {
+    return () => {
+      // Cleanup blob URL when component unmounts
+      if (selectedImageUri && selectedImageUri.startsWith("blob:")) {
+        URL.revokeObjectURL(selectedImageUri);
+      }
+    };
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-900">
@@ -172,6 +287,10 @@ export default function ProfileScreen() {
               source={{ uri: avatarUri }}
               className="w-32 h-32 rounded-full"
               resizeMode="cover"
+              key={selectedImageUri || endUser.profile_image || "default"}
+              onError={(e) => {
+                console.error("Image load error:", e.nativeEvent.error);
+              }}
             />
             {isEditing && (
               <TouchableOpacity

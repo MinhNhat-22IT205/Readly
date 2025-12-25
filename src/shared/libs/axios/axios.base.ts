@@ -22,7 +22,20 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((config) => {
   const access_token = useAuthStore.getState().access_token;
-  if (access_token && config.headers)
+  if (access_token && config.headers) {
     config.headers["Authorization"] = `Bearer ${access_token}`;
+    
+    // Debug logging in development
+    if (__DEV__) {
+      console.log("🔐 Request interceptor:", {
+        url: config.url,
+        method: config.method,
+        hasAuth: !!access_token,
+        authHeader: config.headers["Authorization"]?.substring(0, 30) + "...",
+      });
+    }
+  } else if (__DEV__) {
+    console.warn("⚠️ No access token found for request:", config.url);
+  }
   return config;
 });
