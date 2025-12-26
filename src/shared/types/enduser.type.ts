@@ -9,6 +9,7 @@ type EndUser = {
   phone: string;
   is_active: boolean;
   role: "reader" | "writer" | "admin";
+  role_id?: number; // Optional: role_id from backend (1=admin, 2=reader, 3=writer)
 };
 
 type EndUserMinimal = Pick<EndUser, "id" | "username" | "profile_image">;

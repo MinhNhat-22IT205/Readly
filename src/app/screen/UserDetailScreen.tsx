@@ -68,7 +68,8 @@ export default function UserDetailScreen() {
         phone: data.phone || "",
         bio: data.bio || "",
         is_active: data.is_active ?? true,
-        role: data.role || "reader",
+        role: (data.role_id ==1? "admin" : data.role_id ==2? "reader" : "writer"),
+        
       });
       setErrors({});
     } catch (error: any) {
@@ -287,6 +288,7 @@ export default function UserDetailScreen() {
           nestedScrollEnabled={true}
         >
           {/* Avatar Section */}
+        
           <UserAvatarSection user={user} avatarUri={avatarUri} />
 
           {/* Form Fields */}

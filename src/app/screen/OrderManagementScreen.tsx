@@ -66,7 +66,7 @@ const OrderManagementScreen = () => {
         return {
           icon: "close-circle" as const,
           color: "#f87171",
-          text: "Thanh toán thất bại",
+          text: "Đã hủy thanh toán",
         };
       case "pending":
         return {

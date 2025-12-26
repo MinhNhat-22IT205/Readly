@@ -78,6 +78,16 @@ export default function UserManagementScreen() {
       const data = await fetchUsers(filters);
       console.log("✅ Loaded users:", data.length);
       
+      // Debug: Log role information for first few users
+      if (__DEV__ && data.length > 0) {
+        console.log("👥 User roles sample:", data.slice(0, 3).map(u => ({
+          id: u.id,
+          username: u.username,
+          role: u.role,
+          roleType: typeof u.role,
+        })));
+      }
+      
       // Sort by username alphabetically
       const sorted = [...data].sort((a, b) =>
         a.username.localeCompare(b.username)

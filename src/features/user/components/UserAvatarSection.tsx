@@ -35,6 +35,7 @@ export const UserAvatarSection: React.FC<UserAvatarSectionProps> = ({
   user,
   avatarUri,
 }) => {
+  console.error("Test role", user);
   return (
     <View className="items-center py-6 border-b border-gray-800 bg-gray-800/30">
       <View className="relative">
@@ -50,15 +51,15 @@ export const UserAvatarSection: React.FC<UserAvatarSectionProps> = ({
       <Text className="text-white font-bold text-lg mt-3">{user.username}</Text>
       <View
         className={`px-3 py-1 rounded-full border mt-2 ${getRoleBadgeColor(
-          user.role || "reader"
+          user.role_id ==1? "admin" : user.role_id ==2? "reader" : "writer"
         )}`}
       >
         <Text
           className={`text-xs font-semibold ${getRoleColor(
-            user.role || "reader"
+            user.role_id ==1? "admin" : user.role_id ==2? "reader" : "writer"
           )}`}
         >
-          {(user.role || "reader").toUpperCase()}
+          {(user.role_id ==1? "admin" : user.role_id ==2? "reader" : "writer").toUpperCase()}
         </Text>
       </View>
     </View>

@@ -41,6 +41,14 @@ export const UserDetailModal = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  console.error("Test role_id", user?.role_id+"");
+  // Helper function to convert role_id to role string
+  const getRoleFromRoleId = (roleId: number | undefined): "reader" | "writer" | "admin" => {
+    if (roleId === 1) return "admin";
+    if (roleId === 2) return "reader";
+    return "writer"; // Default to writer for role_id 3 or undefined
+  };
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -49,7 +57,7 @@ export const UserDetailModal = ({
         phone: user.phone || "",
         bio: user.bio || "",
         is_active: user.is_active ?? true,
-        role: user.role || "reader",
+        role: getRoleFromRoleId(user.role_id),
       });
       setErrors({});
     }
@@ -297,15 +305,17 @@ export const UserDetailModal = ({
             </Text>
             <View
               className={`px-3 py-1 rounded-full border mt-2 ${getRoleBadgeColor(
-                user.role || "reader"
+         
+                getRoleFromRoleId(user.role_id)
               )}`}
             >
               <Text
                 className={`text-xs font-semibold ${getRoleColor(
-                  user.role || "reader"
+                  user.role_id+""+
+                  getRoleFromRoleId(user.role_id)
                 )}`}
               >
-                {(user.role || "reader").toUpperCase()}
+                {getRoleFromRoleId(user.role_id).toUpperCase()}
               </Text>
             </View>
           </View>
@@ -315,12 +325,12 @@ export const UserDetailModal = ({
             {/* Row 1: Username & Email (Desktop) or stacked (Mobile) */}
             <View className={IS_DESKTOP ? "flex-row gap-4" : "gap-5"}>
               <FormField
-                label="Username"
+                label="Usernae"
                 value={formData.username}
                 onChange={(text) =>
                   setFormData({ ...formData, username: text })
                 }
-                placeholder="Nhập username"
+                placeholder="Nhập userame"
                 error={errors.username}
                 required
               />

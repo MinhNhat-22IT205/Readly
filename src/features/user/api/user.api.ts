@@ -12,6 +12,7 @@ export type UpdateUserPayload = {
   bio?: string;
   is_active?: boolean;
   role?: "reader" | "writer" | "admin";
+  role_id?: number;
   password?: string;
 };
 
@@ -32,6 +33,9 @@ export const fetchUsers = async (
   if (filters?.role) {
     params.append("role", filters.role);
   }
+  if (filters?.role_id) {
+    params.append("role_id", filters.role_id);
+  }
   if (filters?.is_active !== undefined) {
     params.append("is_active", filters.is_active.toString());
   }
@@ -43,6 +47,7 @@ export const fetchUsers = async (
   const url = queryString ? `${USERS_ENDPOINT}?${queryString}` : USERS_ENDPOINT;
   
   const response = await axiosInstance.get<User[]>(url);
+  console.log("response.data", response.data);
   return response.data;
 };
 
